@@ -57,15 +57,27 @@ $ virtualenv venv
 
 - Windows
 
-`$ venv\Scripts\activate`
+```sh
+$ venv\Scripts\activate
+```
 
 - Ubuntu
 
-`$ source venv/bin/activate`
+```sh
+$ source venv/bin/activate
+```
+
+- Checking
+
+```sh
+$ python --version
+```
 
 ### Dependencies
 
-`$ pip install -r requirements.txt`
+```sh
+$ pip install -r requirements.txt
+```
 
 ## Running the Project
 

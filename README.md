@@ -29,8 +29,10 @@ Follow the following instructions to install the dependencies.
 
 ### Cloning
 
-`$ git clone https://github.com/lucas625/Projeto-CG.git`
-`$ cd project folder`
+```sh
+$ git clone https://github.com/lucas625/Projeto-CG.git
+$ cd project folder
+```
 
 ### Python 3
 
@@ -40,14 +42,18 @@ Go to [python website](https://www.python.org/downloads/).
 
 - Ubuntu
 
-`$ sudo apt update`
-`$ sudo apt install python3-pip`
-`$ pip3 --version`
+```sh
+$ sudo apt update
+$ sudo apt install python3-pip
+$ pip3 --version
+```
 
 ### Virtualenv
 
-`$ pip3 install virtualenv`
-`$ virtualenv venv`
+```sh
+$ pip3 install virtualenv
+$ virtualenv venv
+```
 
 - Windows
 

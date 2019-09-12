@@ -5,14 +5,14 @@ type Vector struct {
 		Class for vectors.
 
 		Members:
-			x - x coordinate.
-			y - y coordinate.
-			z - z coordinate.
+			X - x coordinate.
+			Y - y coordinate.
+			Z - z coordinate.
 
 	*/
-	x float64
-	y float64
-	z float64
+	X float64
+	Y float64
+	Z float64
 } 
 
 func CMultVector(vect *Vector, k float64) Vector {
@@ -27,9 +27,9 @@ func CMultVector(vect *Vector, k float64) Vector {
 			The resulting vector.
 	*/
 	vectAux := Vector{0,0,0}
-	vectAux.x = k * vect.x
-	vectAux.y = k * vect.y
-	vectAux.z = k * vect.z
+	vectAux.X = k * vect.X
+	vectAux.Y = k * vect.Y
+	vectAux.Z = k * vect.Z
 
 	return vectAux
 }
@@ -51,9 +51,9 @@ func SumVector(vect1 *Vector, vect2 *Vector, k1 float64, k2 float64) Vector {
 	vect2Aux := CMultVector(vect2, k2)
 
 	vectAux := Vector{0,0,0}
-	vectAux.x = vect1Aux.x + vect2Aux.x
-	vectAux.y = vect1Aux.y + vect2Aux.y
-	vectAux.z = vect1Aux.z + vect2Aux.z
+	vectAux.X = vect1Aux.X + vect2Aux.X
+	vectAux.Y = vect1Aux.Y + vect2Aux.Y
+	vectAux.Z = vect1Aux.Z + vect2Aux.Z
 
 	return vectAux
 }
@@ -69,7 +69,7 @@ func DotProduct(vect1 *Vector, vect2 *Vector) float64 {
 		Returns:
 			The resulting sum.
 	*/
-	return (vect1.x * vect2.x) + (vect1.y * vect2.y) + (vect1.z * vect2.z)
+	return (vect1.X * vect2.X) + (vect1.Y * vect2.Y) + (vect1.Z * vect2.Z)
 }
 
 func ProjVector(vect1 *Vector, vect2 *Vector) Vector {

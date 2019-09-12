@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/lucas625/Projeto-CG.git/src/utils"
+	"github.com/lucas625/Projeto-CG/src/utils/vector"
 )
 
 func main() {

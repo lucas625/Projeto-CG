@@ -1,8 +1,4 @@
-package main
-
-import (
-	"fmt"
-)
+package Utils
 
 type Vector struct {
 	/*
@@ -14,11 +10,9 @@ type Vector struct {
 			z - z coordinate.
 
 	*/
-
 	x float64
 	y float64
 	z float64
-
 } 
 
 func CMultVector(vect *Vector, k float64) Vector {
@@ -53,7 +47,6 @@ func SumVector(vect1 *Vector, vect2 *Vector, k1 float64, k2 float64) Vector {
 		Returns:
 			The resulting vector.
 	*/
-
 	vect1Aux := CMultVector(vect1, k1)
 	vect2Aux := CMultVector(vect2, k2)
 
@@ -76,9 +69,7 @@ func DotProduct(vect1 *Vector, vect2 *Vector) float64 {
 		Returns:
 			The resulting sum.
 	*/
-
 	return (vect1.x * vect2.x) + (vect1.y * vect2.y) + (vect1.z * vect2.z)
-
 }
 
 func ProjVector(vect1 *Vector, vect2 *Vector) Vector {
@@ -92,7 +83,6 @@ func ProjVector(vect1 *Vector, vect2 *Vector) Vector {
 		Returns:
 			The resulting vector.
 	*/
-
 	topConstant := DotProduct(vect1, vect2)
 	bottomConstant := DotProduct(vect2, vect2)
 
@@ -128,23 +118,9 @@ func CheckOrtogonalVector(vect1 *Vector, vect2 *Vector) bool {
 		Returns:
 			A boolean.
 	*/
-
 	if DotProduct(vect1, vect2) == 0 {
 		return true
 	}
+
 	return false
-
-}
-
-func main() {
-	a := Vector{1,0,0}
-	b := Vector{1,1,0}
-	c := CMultVector(&b, 3)
-	fmt.Println(a)
-	fmt.Println(b)
-	fmt.Println(c)
-
-	d := ProjVector(&a, &b)
-
-	fmt.Println(a, b, c, d)
 }

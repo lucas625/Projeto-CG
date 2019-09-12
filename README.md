@@ -9,8 +9,7 @@ A path tracing project.
     - [VS Code](#vs-code)
   - [Installing](#installing)
     - [Cloning](#cloning)
-    - [Python 3](#python-3)
-    - [Virtualenv](#virtualenv)
+    - [Golang](#golang)
     - [Dependencies](#dependencies)
   - [Running the Project](#running-the-project)
 
@@ -20,8 +19,7 @@ A path tracing project.
 
 - Markdown All in One
 - GitLens
-- Python extension pack
-- pylinter
+- GO
 
 ## Installing
 
@@ -34,50 +32,27 @@ $ git clone https://github.com/lucas625/Projeto-CG.git
 $ cd project folder
 ```
 
-### Python 3
+### Golang
 
 - Windows
+  
+Follow the download page on [golang website](https://golang.org/dl/).
 
-Go to [python website](https://www.python.org/downloads/).
-
-- Ubuntu
+- Linux
 
 ```sh
-$ sudo apt update
-$ sudo apt install python3-pip
-$ pip3 --version
+$ sudo add-apt-repository ppa:longsleep/golang-backports
+$ sudo apt-get update
+$ sudo apt-get install golang-go
 ```
 
-### Virtualenv
-
 ```sh
-$ pip3 install virtualenv
-$ virtualenv venv
-```
-
-- Windows
-
-```sh
-$ venv\Scripts\activate
-```
-
-- Ubuntu
-
-```sh
-$ source venv/bin/activate
-```
-
-- Checking
-
-```sh
-$ python --version
+$ go version
 ```
 
 ### Dependencies
 
-```sh
-$ pip install -r requirements.txt
-```
+go mod will take care of the dependencies.
 
 ## Running the Project
 

@@ -3,6 +3,8 @@ package utils
 import (
 	"errors"
 	"log"
+	"strconv"
+	"fmt"
 )
 
 // Matrix is a class for matrices.
@@ -49,6 +51,25 @@ func matrixLinesColumns(lin, col int) error {
 	return nil
 }
 
+// PrintMatrix is a function to print a Matrix.
+//
+// Parameters:
+// 	matrix - A point to a Matrix.
+//
+// Returns:
+// 	none
+//
+func PrintMatrix(matrix *Matrix) {
+	totalString := "Matrix - lines: %d columns: %d\n values:\n  "
+	for i := range matrix.Values {
+		for j := range matrix.Values[i] {
+			totalString += strconv.FormatFloat(matrix.Values[i][j], 'g', -1, 64) + " "
+		}
+		totalString = totalString[:len(totalString)-1] + "\n  "
+	}
+	fmt.Printf(totalString, matrix.Lines, matrix.Columns)
+}
+
 // InitMatrix is a function to initialize a Matrix.
 //
 // Parameters:
@@ -61,6 +82,10 @@ func matrixLinesColumns(lin, col int) error {
 func InitMatrix(lin, col int) Matrix {
 	err := matrixLinesColumns(lin, col)
 	showError(err, "lines - %d, columns - %d") //add lin and col here
-	matrix := Matrix{Values: make([][]float64, lin, col), Lines: lin, Columns: col}
+	matrix := Matrix{Values: make([][]float64, lin), Lines: lin, Columns: col}
+	// setting default values
+	for i := range matrix.Values {
+		matrix.Values[i] = make([]float64, col)
+	}
 	return matrix
 }

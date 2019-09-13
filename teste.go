@@ -7,6 +7,8 @@ import (
 )
 
 func main() {
-	a := utils.InitMatrix(10, 20)
+	a := utils.InitMatrix(3, 4)
+	a.Values[1][2] = 10
 	fmt.Println(a)
+	utils.PrintMatrix(&a)
 }

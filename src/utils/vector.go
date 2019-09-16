@@ -154,6 +154,30 @@ func VectorToHomogeneousCoord(vect *Vector) Matrix {
 	return maux
 }
 
+// VectorCrossProduct is a function to calculate the cross product of twp Vectors.
+//
+// Parameters:
+// 	vect1 - The first Vector.
+//  vect2 - The second Vector.
+//
+// Returns:
+// 	a Vector
+//
+func VectorCrossProduct(vect1, vect2 *Vector) Vector {
+	CheckVectorCoordinates(vect1, vect2)
+	if len(vect1.Coordinates) != 3 {
+		log.Fatalf("Invalid size of 3D vector: %d.\n", len(vect1.Coordinates))
+	}
+	vaux := InitVector(3)
+	coord1 := vect1.Coordinates
+	coord2 := vect2.Coordinates
+	i := (coord1[1] * coord2[2]) -(coord1[2] * coord2[1])
+	j := (coord1[2] * coord2[0]) -(coord1[0] * coord2[2])
+	k := (coord1[0] * coord2[1]) -(coord1[1] * coord2[0])
+	vaux.Coordinates = []float64{i, j, k}
+	return vaux
+}
+
 // InitVector is a function to initialize a Vector.
 //
 // Parameters:

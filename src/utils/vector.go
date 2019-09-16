@@ -1,5 +1,9 @@
 package utils
 
+import (
+	"log"
+)
+
 // Vector is a class for vectors.
 //
 // Members:
@@ -115,4 +119,22 @@ func CheckOrtogonalVector(vect1 *Vector, vect2 *Vector) bool {
 	}
 
 	return false
+}
+
+// VectorToList is a function to convert the vector to a list.
+//
+// Parameters:
+// 	vect - The vector.
+//
+// Returns:
+// 	The converted vector as list.
+//
+func VectorToList(vect *Vector) []float64 {
+	return []float64{vect.X, vect.Y, vect.Z}
+}
+
+func InitVector(size int) {
+	if size < 0 {
+		log.Fatalf("Invalid vector size %d.\n", size)
+	}
 }

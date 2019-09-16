@@ -7,14 +7,25 @@ import (
 // Vector is a class for vectors.
 //
 // Members:
-// 	X - x coordinate.
-// 	Y - y coordinate.
-// 	Z - z coordinate.
+// 	Coordinates - list of coordinates.
 //
 type Vector struct {
-	X float64
-	Y float64
-	Z float64
+	Coordinates []float64
+}
+
+// CheckVectorCoordinates is a function to check if two vectors are of the same size.
+//
+// Parameters:
+// 	vect1 - The first vector.
+// 	vect2 - The second vector.
+//
+// Returns:
+// 	none
+//
+func CheckVectorCoordinates(vect1 *Vector, vect2 *Vector) {
+	if len(vect1.Coordinates) != len(vect2.Coordinates) {
+		log.Fatalf("Invalid size of vector. Expected: %d and Got: %d.\n", len(vect1.Coordinates), len(vect2.Coordinates))
+	}
 }
 
 // CMultVector is a function for Scalar Multiplication.
@@ -27,11 +38,10 @@ type Vector struct {
 // 	The resulting vector.
 //
 func CMultVector(vect *Vector, k float64) Vector {
-	vectAux := Vector{0, 0, 0}
-	vectAux.X = k * vect.X
-	vectAux.Y = k * vect.Y
-	vectAux.Z = k * vect.Z
-
+	vectAux := InitVector(len(vect.Coordinates))
+	for i := 0; i < len(vect.Coordinates); i++ {
+		vectAux.Coordinates[i] = k * vect.Coordinates[i]
+	}
 	return vectAux
 }
 
@@ -47,14 +57,14 @@ func CMultVector(vect *Vector, k float64) Vector {
 // 	The resulting vector.
 //
 func SumVector(vect1 *Vector, vect2 *Vector, k1 float64, k2 float64) Vector {
+	CheckVectorCoordinates(vect1, vect2)
 	vect1Aux := CMultVector(vect1, k1)
 	vect2Aux := CMultVector(vect2, k2)
 
-	vectAux := Vector{0, 0, 0}
-	vectAux.X = vect1Aux.X + vect2Aux.X
-	vectAux.Y = vect1Aux.Y + vect2Aux.Y
-	vectAux.Z = vect1Aux.Z + vect2Aux.Z
-
+	vectAux := InitVector(len(vect1.Coordinates))
+	for i := 0; i < len(vect1.Coordinates); i++ {
+		vectAux.Coordinates[i] = vect1Aux.Coordinates[i] + vect2Aux.Coordinates[i]
+	}
 	return vectAux
 }
 
@@ -68,7 +78,13 @@ func SumVector(vect1 *Vector, vect2 *Vector, k1 float64, k2 float64) Vector {
 // 	The resulting sum.
 //
 func DotProduct(vect1 *Vector, vect2 *Vector) float64 {
-	return (vect1.X * vect2.X) + (vect1.Y * vect2.Y) + (vect1.Z * vect2.Z)
+	CheckVectorCoordinates(vect1, vect2)
+
+	var totalSum float64
+	for i := 0; i < len(vect1.Coordinates); i++ {
+		totalSum += vect1.Coordinates[i] * vect2.Coordinates[i]
+	}
+	return totalSum
 }
 
 // ProjVector is a function to project one vector in the other.
@@ -81,6 +97,7 @@ func DotProduct(vect1 *Vector, vect2 *Vector) float64 {
 // 	The resulting vector.
 //
 func ProjVector(vect1 *Vector, vect2 *Vector) Vector {
+	CheckVectorCoordinates(vect1, vect2)
 	topConstant := DotProduct(vect1, vect2)
 	bottomConstant := DotProduct(vect2, vect2)
 
@@ -121,20 +138,34 @@ func CheckOrtogonalVector(vect1 *Vector, vect2 *Vector) bool {
 	return false
 }
 
-// VectorToList is a function to convert the vector to a list.
+// VectorToHomogeneousCoord is a function to add the extra 0 coord and transpose the Vector converting it to Matrix.
 //
 // Parameters:
-// 	vect - The vector.
+// 	vect - The Vector.
 //
 // Returns:
-// 	The converted vector as list.
+// 	a Matrix.
 //
-func VectorToList(vect *Vector) []float64 {
-	return []float64{vect.X, vect.Y, vect.Z}
+func VectorToHomogeneousCoord(vect *Vector) Matrix {
+	maux := InitMatrix(len(vect.Coordinates)+1, 1)
+	for i := 0; i < len(vect.Coordinates); i++ {
+		maux.Values[i][0] = vect.Coordinates[i]
+	}
+	return maux
 }
 
-func InitVector(size int) {
+// InitVector is a function to initialize a Vector.
+//
+// Parameters:
+// 	size - The size of the Vector.
+//
+// Returns:
+// 	a Vector
+//
+func InitVector(size int) Vector {
 	if size < 0 {
 		log.Fatalf("Invalid vector size %d.\n", size)
 	}
+	vect := Vector{Coordinates: make([]float64, size)}
+	return vect
 }

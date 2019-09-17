@@ -2,6 +2,7 @@ package utils
 
 import (
 	"log"
+	"math"
 )
 
 // Vector is a class for vectors.
@@ -154,7 +155,7 @@ func VectorToHomogeneousCoord(vect *Vector) Matrix {
 	return maux
 }
 
-// VectorCrossProduct is a function to calculate the cross product of twp Vectors.
+// VectorCrossProduct is a function to calculate the cross product of two Vectors.
 //
 // Parameters:
 // 	vect1 - The first Vector.
@@ -176,6 +177,31 @@ func VectorCrossProduct(vect1, vect2 *Vector) Vector {
 	k := (coord1[0] * coord2[1]) - (coord1[1] * coord2[0])
 	vaux.Coordinates = []float64{i, j, k}
 	return vaux
+}
+
+// VectorNorm is a function to calculate the norm of a Vector.
+//
+// Parameters:
+// 	vect - The Vector.
+//
+// Returns:
+// 	the norm of the Vector.
+//
+func VectorNorm(vect *Vector) float64 {
+	return math.Sqrt(DotProduct(vect, vect))
+}
+
+// NormalizeVector is a function to normalize a Vector.
+//
+// Parameters:
+// 	vect - The Vector.
+//
+// Returns:
+// 	the normalized Vector.
+//
+func NormalizeVector(vect *Vector) Vector {
+	norm := VectorNorm(vect)
+	return CMultVector(vect, 1/norm)
 }
 
 // InitVector is a function to initialize a Vector.

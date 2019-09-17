@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/lucas625/Projeto-CG/src/camera"
 	"github.com/lucas625/Projeto-CG/src/entity"
 	"github.com/lucas625/Projeto-CG/src/utils"
 )
@@ -36,4 +37,9 @@ func main() {
 	// triangle
 	triang := entity.InitTriangle([]int{0, 1, 2})
 	fmt.Println(triang)
+	v1 := utils.Vector{Coordinates: a.Coordinates}
+	v2 := utils.Vector{Coordinates: b.Coordinates}
+	v3 := utils.Vector{Coordinates: c.Coordinates}
+	cam := camera.InitCamera(a, v1, v2, v3)
+	fmt.Println(cam)
 }

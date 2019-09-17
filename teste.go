@@ -33,4 +33,7 @@ func main() {
 	vaux := entity.MultVertices(&vertices, &maux)
 	utils.PrintMatrix(&maux)
 	fmt.Println(vaux)
+	// triangle
+	triang := entity.InitTriangle([]int{0, 1, 2})
+	fmt.Println(triang)
 }

@@ -7,7 +7,7 @@ import (
 // Vertices is a class for vertices.
 //
 // Members:
-// 	Vertices - list of vertices.
+// 	Points - list of Points.
 //
 type Vertices struct {
 	Points []Point

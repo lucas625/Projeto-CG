@@ -16,7 +16,7 @@ func InitHomogeneousCoordMatrix(dim int) Matrix {
 	if dim > 3 || dim < 2 {
 		log.Fatalf("Invalid dimensions: %d.\n", dim)
 	}
-	maux := IdMatrix(dim+1)
+	maux := IDMatrix(dim + 1)
 	return maux
 }
 
@@ -32,13 +32,13 @@ func InitHomogeneousCoordMatrix(dim int) Matrix {
 func InitTranslationMatrix(dim int, trans []float64) Matrix {
 	if dim > 3 || dim < 2 {
 		log.Fatalf("Invalid dimensions: %d.\n", dim)
-	} 
+	}
 	if len(trans) != dim {
 		log.Fatalf("Invalid number of values to translate, expected: %d and got: %d.\n", dim, len(trans))
 	}
 	maux := InitHomogeneousCoordMatrix(dim)
 	for i := 0; i < dim; i++ {
-		maux.Values[i][dim-1] = trans[i]
+		maux.Values[i][dim] = trans[i]
 	}
 	return maux
 }

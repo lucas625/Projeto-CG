@@ -171,9 +171,9 @@ func VectorCrossProduct(vect1, vect2 *Vector) Vector {
 	vaux := InitVector(3)
 	coord1 := vect1.Coordinates
 	coord2 := vect2.Coordinates
-	i := (coord1[1] * coord2[2]) -(coord1[2] * coord2[1])
-	j := (coord1[2] * coord2[0]) -(coord1[0] * coord2[2])
-	k := (coord1[0] * coord2[1]) -(coord1[1] * coord2[0])
+	i := (coord1[1] * coord2[2]) - (coord1[2] * coord2[1])
+	j := (coord1[2] * coord2[0]) - (coord1[0] * coord2[2])
+	k := (coord1[0] * coord2[1]) - (coord1[1] * coord2[0])
 	vaux.Coordinates = []float64{i, j, k}
 	return vaux
 }

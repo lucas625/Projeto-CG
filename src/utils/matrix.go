@@ -2,9 +2,9 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
-	"fmt"
 )
 
 // Matrix is a class for matrices.
@@ -116,7 +116,7 @@ func TransposeMatrix(matrix *Matrix) Matrix {
 	return maux
 }
 
-// IdMatrix is a function to initialize a Identity Matrix.
+// IDMatrix is a function to initialize a Identity Matrix.
 //
 // Parameters:
 // 	size - The number of lines of the matrix.
@@ -124,7 +124,7 @@ func TransposeMatrix(matrix *Matrix) Matrix {
 // Returns:
 // 	A Matrix.
 //
-func IdMatrix(size int) Matrix {
+func IDMatrix(size int) Matrix {
 	if size < 1 {
 		log.Fatalf("Invalid size of identity matrix: %d.\n", size)
 	}

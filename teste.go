@@ -3,26 +3,37 @@ package main
 import (
 	"fmt"
 
+	"github.com/lucas625/Projeto-CG/src/entity"
 	"github.com/lucas625/Projeto-CG/src/utils"
 )
 
 func main() {
-	a := utils.InitTranslationMatrix(3, []float64{-2, 10, -3})
-	a.Values[0][1] = 2
-	a.Values[0][2] = 20
-	a.Values[1][0] = -4
-	a.Values[1][2] = 30
-	a.Values[2][0] = -2
-	a.Values[2][1] = 45
-	//utils.PrintMatrix(&a)
-	b := utils.TransposeMatrix(&a)
-	//util.PrintMatrix(&b)
-	c := utils.MultMatrix(&a, &b)
-	//utils.PrintMatrix(&c)
-	d := utils.CMultMatrix(&c, 2)
-	utils.PrintMatrix(&d)
-	v1 := utils.InitVector(3)
-	v1.Coordinates = []float64{2, 0, 0}
-	v2 := utils.NormalizeVector(&v1)
-	fmt.Println(v1, v2)
+	a := entity.InitPoint(3)
+	a.Coordinates[0] = 2
+	a.Coordinates[1] = 3
+	a.Coordinates[2] = 5
+	b := entity.InitPoint(3)
+	b.Coordinates[0] = -1
+	b.Coordinates[1] = 2
+	b.Coordinates[2] = 4
+	c := entity.InitPoint(3)
+	c.Coordinates[0] = 5
+	c.Coordinates[1] = 3
+	c.Coordinates[2] = 2
+	// matrix
+	maux := utils.InitTranslationMatrix(3, []float64{10, 15, 25})
+	maux.Values[0][1] = 2
+	maux.Values[0][2] = -3
+	maux.Values[1][0] = -1
+	maux.Values[1][2] = 5
+	maux.Values[2][0] = 1
+	maux.Values[2][1] = 1
+	// vertices
+	vertices := entity.InitVertices([]entity.Point{a, b, c})
+	vaux := entity.MultVertices(&vertices, &maux)
+	utils.PrintMatrix(&maux)
+	fmt.Println(vaux)
+	// triangle
+	triang := entity.InitTriangle([]int{0, 1, 2})
+	fmt.Println(triang)
 }

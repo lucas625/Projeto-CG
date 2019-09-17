@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/lucas625/Projeto-CG/src/entity"
 )
 
 func main() {
@@ -13,6 +15,5 @@ func main() {
 	b.Coordinates[0] = -1
 	b.Coordinates[1] = 2
 	b.Coordinates[2] = 4
-	c := entity.ExtractVector(&a, &b)
-	fmt.Println(c)
+	fmt.Println(entity.PointToHomogeneousCoord(&a), a)
 }

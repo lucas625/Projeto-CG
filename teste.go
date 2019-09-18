@@ -10,13 +10,13 @@ import (
 
 func main() {
 	a := entity.InitPoint(3)
-	a.Coordinates[0] = 2
-	a.Coordinates[1] = 3
-	a.Coordinates[2] = 5
+	a.Coordinates[0] = 0
+	a.Coordinates[1] = 0
+	a.Coordinates[2] = 1
 	b := entity.InitPoint(3)
-	b.Coordinates[0] = -1
-	b.Coordinates[1] = 2
-	b.Coordinates[2] = 4
+	b.Coordinates[0] = 0
+	b.Coordinates[1] = 0
+	b.Coordinates[2] = 2
 	c := entity.InitPoint(3)
 	c.Coordinates[0] = 5
 	c.Coordinates[1] = 3
@@ -37,9 +37,6 @@ func main() {
 	// triangle
 	triang := entity.InitTriangle([]int{0, 1, 2})
 	fmt.Println(triang)
-	v1 := utils.Vector{Coordinates: a.Coordinates}
-	v2 := utils.Vector{Coordinates: b.Coordinates}
-	v3 := utils.Vector{Coordinates: c.Coordinates}
-	cam := camera.InitCamera(a, v1, v2, v3)
+	cam := camera.InitCameraWithPoints(&a, &b)
 	fmt.Println(cam)
 }

@@ -76,3 +76,27 @@ func InitCamera(pos entity.Point, look, up, right utils.Vector) Camera {
 	cam := Camera{Pos: pos, Look: look, Up: up, Right: right}
 	return cam
 }
+
+// InitCameraWithPoints is a function to initialize a Camera based only on its position and the target point.
+//
+// Parameters:
+// 	pos    - the position of the camera.
+// 	target - target Point.
+//
+// Returns:
+// 	A Camera.
+//
+func InitCameraWithPoints(pos, target *entity.Point) Camera {
+	look := entity.ExtractVector(pos, target)
+	look = utils.NormalizeVector(&look)
+
+	vectTemp := utils.Vector{Coordinates: []float64{0, 1, 0}}
+	vectTemp = utils.NormalizeVector(&vectTemp)
+	right := utils.VectorCrossProduct(&vectTemp, &look)
+	right = utils.NormalizeVector(&right)
+
+	up := utils.VectorCrossProduct(&look, &right)
+	up = utils.NormalizeVector(&up)
+
+	return InitCamera(*pos, look, right, up)
+}

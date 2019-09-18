@@ -39,4 +39,7 @@ func main() {
 	fmt.Println(triang)
 	cam := camera.InitCameraWithPoints(&a, &b)
 	fmt.Println(cam)
+	mCam := camera.CamToHomogeneousMatrix(&cam)
+	utils.PrintMatrix(&mCam)
+	fmt.Println(mCam)
 }

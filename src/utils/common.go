@@ -4,7 +4,7 @@ import (
 	"log"
 )
 
-// showError is a function to print an error.
+// ShowError is a function to print an error.
 //
 // Parameters:
 // 	err - The error.
@@ -13,7 +13,7 @@ import (
 // Returns:
 // 	none
 //
-func showError(err error, msg string) {
+func ShowError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s\n", msg, err)
 	}

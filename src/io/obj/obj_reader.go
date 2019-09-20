@@ -13,6 +13,28 @@ import (
 	"github.com/lucas625/Projeto-CG/src/utils"
 )
 
+// readVertex is a function to read a vertex of an .obj file.
+//
+// Parameters:
+// 	line   - a single .obj line.
+//
+// Returns:
+//  hash   - a int that identifies the type of the return.
+//  result - a Triangle, Vertex or Vector.
+//
+func readVertex(line string) *entity.Vertex {
+
+}
+
+// readLine is a function to read a line of an .obj file.
+//
+// Parameters:
+// 	line   - a single .obj line.
+//
+// Returns:
+//  hash   - a int that identifies the type of the return.
+//  result - a Triangle, Vertex or Vector.
+//
 func readLine(line string) (int, *[]byte) {
 	result := make([]byte, 10) //fix me
 	var hash int
@@ -20,10 +42,10 @@ func readLine(line string) (int, *[]byte) {
 	case 'v':
 		if line[1] == 'n' {
 			hash = 1
-			fmt.Println("vertice normal")
+			fmt.Println("vertex normal")
 		} else {
 			hash = 0
-			fmt.Println("point")
+			fmt.Println("vertex")
 		}
 	case 'f':
 		hash = 2
@@ -32,7 +54,7 @@ func readLine(line string) (int, *[]byte) {
 	return hash, &result
 }
 
-// readLines is a function to read allline of an .obj file.
+// readLines is a function to read all lines of an .obj file.
 //
 // Parameters:
 // 	scanner   - pointer to a Scanner with an .obj file.

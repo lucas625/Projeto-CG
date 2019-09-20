@@ -3,19 +3,20 @@ package main
 import (
 	"fmt"
 
+	"github.com/lucas625/Projeto-CG/src/camera"
 	"github.com/lucas625/Projeto-CG/src/entity"
 	"github.com/lucas625/Projeto-CG/src/utils"
 )
 
 func main() {
 	a := entity.InitPoint(3)
-	a.Coordinates[0] = 2
-	a.Coordinates[1] = 3
-	a.Coordinates[2] = 5
+	a.Coordinates[0] = 0
+	a.Coordinates[1] = 0
+	a.Coordinates[2] = 1
 	b := entity.InitPoint(3)
-	b.Coordinates[0] = -1
-	b.Coordinates[1] = 2
-	b.Coordinates[2] = 4
+	b.Coordinates[0] = 0
+	b.Coordinates[1] = 0
+	b.Coordinates[2] = 2
 	c := entity.InitPoint(3)
 	c.Coordinates[0] = 5
 	c.Coordinates[1] = 3
@@ -36,4 +37,9 @@ func main() {
 	// triangle
 	triang := entity.InitTriangle([]int{0, 1, 2})
 	fmt.Println(triang)
+	cam := camera.InitCameraWithPoints(&a, &b)
+	fmt.Println(cam)
+	mCam := camera.CamToHomogeneousMatrix(&cam)
+	utils.PrintMatrix(&mCam)
+	fmt.Println(mCam)
 }

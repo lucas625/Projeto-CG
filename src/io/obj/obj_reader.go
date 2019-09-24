@@ -6,23 +6,33 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/lucas625/Projeto-CG/src/general"
+	"strconv"
+	"strings"
 
 	"github.com/lucas625/Projeto-CG/src/entity"
+	"github.com/lucas625/Projeto-CG/src/general"
 	"github.com/lucas625/Projeto-CG/src/utils"
 )
 
-// readVertex is a function to read a vertex of an .obj file.
+// readPoint is a function to read a vertex of an .obj file.
 //
 // Parameters:
 // 	line   - a single .obj line.
 //
 // Returns:
-//  hash   - a int that identifies the type of the return.
-//  result - a Triangle, Vertex or Vector.
+//  the vertex as a point in json bytes.
 //
-func readVertex(line string) *entity.Vertex {
+func readPoint(line string) *[]byte {
+	inp := strings.Split(line[2:], " ")
+	pt := entity.InitPoint(3)
+	for i, c := range inp {
+		var err error
+		pt.Coordinates[i], err = strconv.ParseFloat(c, 64)
+		utils.ShowError(err, "Unable to convert to coordinate to float.")
+	}
+	ptAsBytes, err := json.Marshal(pt)
+	utils.ShowError(err, "Unable to marshal point")
+	return &ptAsBytes
 
 }
 
@@ -42,14 +52,16 @@ func readLine(line string) (int, *[]byte) {
 	case 'v':
 		if line[1] == 'n' {
 			hash = 1
-			fmt.Println("vertex normal")
+			inp := strings.Split(line, " ")
+			fmt.Println(inp)
 		} else {
 			hash = 0
-			fmt.Println("vertex")
+			result = *(readPoint(line))
 		}
 	case 'f':
 		hash = 2
-		fmt.Println("triangle")
+		inp := strings.Split(line[2:], " ")
+		fmt.Println(inp)
 	}
 	return hash, &result
 }
@@ -65,30 +77,31 @@ func readLine(line string) (int, *[]byte) {
 //  normals   - pointer to list of normal vectors.
 //
 func readLines(scanner *bufio.Scanner) (*entity.Vertices, *[]entity.Triangle, *[]utils.Vector) {
-	var vertList []entity.Vertex
+	var pointList []entity.Point
 	var triangles []entity.Triangle
 	var normals []utils.Vector
 	for scanner.Scan() {
 		hash, result := readLine(scanner.Text())
+		print(hash, result)
 		switch hash {
 		case 0:
-			var vt entity.Vertex
-			err := json.Unmarshal(*result, &vt)
-			utils.ShowError(err, "Unable to Unmarshal Vertex.")
-			vertList = append(vertList, vt)
-		case 1:
-			var tri entity.Triangle
-			err := json.Unmarshal(*result, &tri)
-			utils.ShowError(err, "Unable to Unmarshal Triangle.")
-			triangles = append(triangles, tri)
-		case 2:
-			var vect utils.Vector
-			err := json.Unmarshal(*result, &vect)
-			utils.ShowError(err, "Unable to Unmarshal Vector.")
-			normals = append(normals, vect)
+			var pt entity.Point
+			err := json.Unmarshal(*result, &pt)
+			utils.ShowError(err, "Unable to Unmarshal Point.")
+			pointList = append(pointList, pt)
+			// case 1:
+			// 	var tri entity.Triangle
+			// 	err := json.Unmarshal(*result, &tri)
+			// 	utils.ShowError(err, "Unable to Unmarshal Triangle.")
+			// 	triangles = append(triangles, tri)
+			// case 2:
+			// 	var vect utils.Vector
+			// 	err := json.Unmarshal(*result, &vect)
+			// 	utils.ShowError(err, "Unable to Unmarshal Vector.")
+			// 	normals = append(normals, vect)
 		}
 	}
-	vertices := entity.InitVertices(vertList)
+	vertices := entity.InitVertices(pointList)
 	return &vertices, &triangles, &normals
 }
 
@@ -104,6 +117,7 @@ func readLines(scanner *bufio.Scanner) (*entity.Vertices, *[]entity.Triangle, *[
 //  normals   - list of normal vectors.
 //
 func ReadObj(objPath string) {
+
 	// getting abs path
 	absPath, err := filepath.Abs(objPath)
 	utils.ShowError(err, "Unable to find absolute path for: "+objPath+".")

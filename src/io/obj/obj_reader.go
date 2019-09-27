@@ -46,24 +46,19 @@ func readPoint(line string) *[]byte {
 //  result - a Triangle, Vertex or Vector.
 //
 func readLine(line string) (int, *[]byte) {
-	result := make([]byte, 10) //fix me
-	var hash int
 	switch line[0] {
 	case 'v':
 		if line[1] == 'n' {
-			hash = 1
 			inp := strings.Split(line, " ")
 			fmt.Println(inp)
 		} else {
-			hash = 0
-			result = *(readPoint(line))
+			return 0, readPoint(line)
 		}
 	case 'f':
-		hash = 2
 		inp := strings.Split(line[2:], " ")
 		fmt.Println(inp)
 	}
-	return hash, &result
+	return -1, nil
 }
 
 // readLines is a function to read all lines of an .obj file.
@@ -89,6 +84,7 @@ func readLines(scanner *bufio.Scanner) (*entity.Vertices, *[]entity.Triangle, *[
 			err := json.Unmarshal(*result, &pt)
 			utils.ShowError(err, "Unable to Unmarshal Point.")
 			pointList = append(pointList, pt)
+			break
 			// case 1:
 			// 	var tri entity.Triangle
 			// 	err := json.Unmarshal(*result, &tri)
@@ -116,7 +112,7 @@ func readLines(scanner *bufio.Scanner) (*entity.Vertices, *[]entity.Triangle, *[
 //  vertices  - Vertices object with all points.
 //  normals   - list of normal vectors.
 //
-func ReadObj(objPath string) {
+func ReadObj(objPath string) *general.Object {
 
 	// getting abs path
 	absPath, err := filepath.Abs(objPath)
@@ -129,10 +125,10 @@ func ReadObj(objPath string) {
 
 	scanner := bufio.NewScanner(file)
 	vertices, triangles, normals := readLines(scanner)
-	object := general.InitObject(vertices, triangles, normals, nil)
-	fmt.Println(object)
+	object := general.InitObject("cubo", vertices, triangles, normals, nil)
 
 	err = scanner.Err()
 	utils.ShowError(err, "Error on reading file: "+absPath+".")
 
+	return &object
 }

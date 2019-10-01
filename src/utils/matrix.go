@@ -146,7 +146,7 @@ func IDMatrix(size int) Matrix {
 //
 func InitMatrix(lin, col int) Matrix {
 	err := matrixLinesColumns(lin, col)
-	showError(err, "lines - %d, columns - %d.") //add lin and col here
+	ShowError(err, "lines - %d, columns - %d.") //add lin and col here
 	matrix := Matrix{Values: make([][]float64, lin), Lines: lin, Columns: col}
 	// setting default values
 	for i := range matrix.Values {

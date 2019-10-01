@@ -2,9 +2,10 @@ package utils
 
 import (
 	"log"
+	"os"
 )
 
-// showError is a function to print an error.
+// ShowError is a function to print an error.
 //
 // Parameters:
 // 	err - The error.
@@ -13,8 +14,27 @@ import (
 // Returns:
 // 	none
 //
-func showError(err error, msg string) {
+func ShowError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s\n", msg, err)
 	}
+}
+
+// PathExists returns a boolean checking if the target file or folder exists.
+//
+// Parameters:
+// 	path - Path to the file or directory.
+//
+// Returns:
+// 	a boolean.
+//
+func PathExists(path string) bool {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true
+	}
+	if os.IsNotExist(err) {
+		return false
+	}
+	return true
 }

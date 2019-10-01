@@ -14,10 +14,16 @@ func main() {
 	fmt.Print("Enter the path to a .obj file: ")
 	objPath, _ := reader.ReadString('\n')
 	objPath = objPath[:len(objPath)-1] // removing \n
+	if objPath == "-1" {               // test case
+		objPath = "resources/obj/simple/cube.obj"
+	}
 
 	fmt.Print("Enter the path to the output folder: ")
 	outPath, _ := reader.ReadString('\n')
 	outPath = outPath[:len(outPath)-1] // removing \n
+	if outPath == "-1" {               // test case
+		outPath = "out/"
+	}
 
 	object := obj.ReadObj(objPath)
 

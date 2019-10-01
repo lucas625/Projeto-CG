@@ -14,6 +14,27 @@ import (
 	"github.com/lucas625/Projeto-CG/src/utils"
 )
 
+// readNormal is a function to read a vertex normal of an .obj file.
+//
+// Parameters:
+// 	line   - a single .obj line.
+//
+// Returns:
+//  the vector as json bytes.
+//
+func readNormal(line string) *[]byte {
+	inp := strings.Split(line[3:], " ")
+	vect := utils.InitVector(3)
+	for i, c := range inp {
+		var err error
+		vect.Coordinates[i], err = strconv.ParseFloat(c, 64)
+		utils.ShowError(err, "Unable to convert to coordinate to float.")
+	}
+	vectAsBytes, err := json.Marshal(vect)
+	utils.ShowError(err, "Unable to marshal vector.")
+	return &vectAsBytes
+}
+
 // readPoint is a function to read a vertex of an .obj file.
 //
 // Parameters:
@@ -31,9 +52,8 @@ func readPoint(line string) *[]byte {
 		utils.ShowError(err, "Unable to convert to coordinate to float.")
 	}
 	ptAsBytes, err := json.Marshal(pt)
-	utils.ShowError(err, "Unable to marshal point")
+	utils.ShowError(err, "Unable to marshal point.")
 	return &ptAsBytes
-
 }
 
 // readLine is a function to read a line of an .obj file.
@@ -49,11 +69,9 @@ func readLine(line string) (int, *[]byte) {
 	switch line[0] {
 	case 'v':
 		if line[1] == 'n' {
-			inp := strings.Split(line, " ")
-			fmt.Println(inp)
-		} else {
-			return 0, readPoint(line)
+			return 2, readNormal(line)
 		}
+		return 0, readPoint(line) // vertex case
 	case 'f':
 		inp := strings.Split(line[2:], " ")
 		fmt.Println(inp)
@@ -90,11 +108,11 @@ func readLines(scanner *bufio.Scanner) (*entity.Vertices, *[]entity.Triangle, *[
 			// 	err := json.Unmarshal(*result, &tri)
 			// 	utils.ShowError(err, "Unable to Unmarshal Triangle.")
 			// 	triangles = append(triangles, tri)
-			// case 2:
-			// 	var vect utils.Vector
-			// 	err := json.Unmarshal(*result, &vect)
-			// 	utils.ShowError(err, "Unable to Unmarshal Vector.")
-			// 	normals = append(normals, vect)
+		case 2:
+			var vect utils.Vector
+			err := json.Unmarshal(*result, &vect)
+			utils.ShowError(err, "Unable to Unmarshal Vector.")
+			normals = append(normals, vect)
 		}
 	}
 	vertices := entity.InitVertices(pointList)

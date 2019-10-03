@@ -55,7 +55,47 @@ func WriteJSONObject(obj *Object, outPath string) {
 	utils.ShowError(err, "Unable to get write object.")
 }
 
-// InitObject is a function to initialize a Object.
+// GetBoundingBox is a function to get the bounding box of an Object.
+//
+// Parameters:
+//  none
+//
+// Returns:
+//  [minX, minY, minZ, maxX, maxY, maxZ]
+//
+func (obj *Object) GetBoundingBox() []float64 {
+	vertices := obj.Vertices
+	bb := make([]float64, 6)
+	for i := 0; i < 3; i++ {
+		bb[i] = vertices.Points[0].Coordinates[i]
+		bb[i+3] = vertices.Points[0].Coordinates[i]
+	}
+	for _, point := range vertices.Points {
+		for j := 0; j < 3; j++ {
+			if bb[j] > point.Coordinates[j] {
+				bb[j] = point.Coordinates[j]
+			}
+			if bb[j+3] < point.Coordinates[j] {
+				bb[j+3] = point.Coordinates[j]
+			}
+		}
+	}
+	return bb
+}
+
+// FindCamera is a function to initialize a Camera.
+//
+// Parameters:
+//  none
+//
+// Returns:
+//  none
+//
+func (obj *Object) FindCamera() {
+
+}
+
+// InitObject is a function to initialize an Object.
 //
 // Parameters:
 // 	points - a list of points.

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/lucas625/Projeto-CG/src/general"
 	"github.com/lucas625/Projeto-CG/src/io/obj"
 )
 
@@ -14,8 +13,19 @@ func main() {
 	fmt.Print("Enter the path to a .obj file: ")
 	objPath, _ := reader.ReadString('\n')
 	objPath = objPath[:len(objPath)-1] // removing \n
-	if objPath == "-1" {               // test case
+	switch objPath {                   //test cases
+	case "-1":
+		objPath = "resources/obj/simple/cone.obj"
+	case "-2":
 		objPath = "resources/obj/simple/cube.obj"
+	case "-3":
+		objPath = "resources/obj/simple/plane.obj"
+	case "-4":
+		objPath = "resources/obj/complex/horned_ball.obj"
+	case "-5":
+		objPath = "resources/obj/complex/monkey_with_cube.obj"
+	case "-6":
+		objPath = "resources/obj/complex/spikedball.obj"
 	}
 
 	fmt.Print("Enter the path to the output folder: ")
@@ -27,5 +37,6 @@ func main() {
 
 	object := obj.ReadObj(objPath)
 
-	general.WriteJSONObject(object, outPath)
+	object.GetBoundingBox()
+
 }

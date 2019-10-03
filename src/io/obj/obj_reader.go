@@ -142,6 +142,22 @@ func readLines(scanner *bufio.Scanner) (*entity.Vertices, *[]entity.Triangle, *[
 	return &vertices, &triangles, &normals
 }
 
+// getName is a function to get the name of an .obj file.
+//
+// Parameters:
+// 	objPath  - path to the .obj file.
+//
+// Returns:
+//  name - the name of the object.
+//
+func getName(objPath string) string {
+	paths := strings.Split(objPath, "/")
+	nameWithExt := paths[len(paths)-1]
+	nameWESplitted := strings.Split(nameWithExt, ".")
+	name := nameWESplitted[0]
+	return name
+}
+
 // ReadObj is a function to read a .obj file.
 //
 // Parameters:
@@ -166,7 +182,8 @@ func ReadObj(objPath string) *general.Object {
 
 	scanner := bufio.NewScanner(file)
 	vertices, triangles, normals := readLines(scanner)
-	object := general.InitObject("cubo", vertices, triangles, normals, nil)
+	name := getName(objPath)
+	object := general.InitObject(name, vertices, triangles, normals, nil)
 
 	err = scanner.Err()
 	utils.ShowError(err, "Error on reading file: "+absPath+".")

@@ -1,8 +1,12 @@
 package camera
 
 import (
-	"fmt"
+	"encoding/json"
+	"io/ioutil"
 	"log"
+	"os"
+	"path"
+	"path/filepath"
 
 	"github.com/lucas625/Projeto-CG/src/entity"
 	"github.com/lucas625/Projeto-CG/src/utils"
@@ -62,6 +66,32 @@ func CheckLenVector(vect utils.Vector) {
 	}
 }
 
+// WriteJSONCamera is a function to write all Camera data as json.
+//
+// Parameters:
+// 	obj      - a list of points.
+//  outPath - path to the output folder.
+//
+// Returns:
+//  none
+//
+func (cam *Camera) WriteJSONCamera(outPath string) {
+	// creating the json
+	file, err := json.MarshalIndent(*cam, "", "	")
+	utils.ShowError(err, "Unable to convert camera to json.")
+	// getting the right path
+	filePath, err := filepath.Abs(path.Join(outPath, "camera.json"))
+	utils.ShowError(err, "Unable to get camera's absolute path.")
+	// creating the folder if it doesn't exists.
+	if !utils.PathExists(filePath) {
+		err = os.MkdirAll(outPath, 0700)
+		utils.ShowError(err, "Unable to create dirs.")
+	}
+	// writing
+	err = ioutil.WriteFile(filePath, file, 0700)
+	utils.ShowError(err, "Unable to write camera.")
+}
+
 // InitCamera is a function to initialize a Camera.
 //
 // Parameters:
@@ -101,7 +131,6 @@ func InitCameraWithPoints(pos, target *entity.Point) Camera {
 	vectTemp = utils.NormalizeVector(&vectTemp)
 	right := utils.VectorCrossProduct(&vectTemp, &look)
 	right = utils.NormalizeVector(&right)
-	fmt.Println("right", right)
 	up := utils.VectorCrossProduct(&look, &right)
 	up = utils.NormalizeVector(&up)
 

@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/lucas625/Projeto-CG/src/general"
+
+	"github.com/lucas625/Projeto-CG/src/entity"
+
 	"github.com/lucas625/Projeto-CG/src/io/obj"
 )
 
@@ -37,6 +41,10 @@ func main() {
 
 	object := obj.ReadObj(objPath)
 
-	object.GetBoundingBox()
+	pt := entity.Point{Coordinates: []float64{1, 2, 3}}
+	object.FindCamera(&pt)
+	general.WriteJSONObject(object, outPath)
+	cam := object.Camera
+	cam.WriteJSONCamera(outPath)
 
 }

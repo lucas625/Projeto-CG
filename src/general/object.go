@@ -44,7 +44,7 @@ func WriteJSONObject(obj *Object, outPath string) {
 	utils.ShowError(err, "Unable to convert object to json.")
 	// getting the right path
 	filePath, err := filepath.Abs(path.Join(outPath, obj.Name+".json"))
-	utils.ShowError(err, "Unable to get absolute path of object.")
+	utils.ShowError(err, "Unable to get object's absolute path.")
 	// creating the folder if it doesn't exists.
 	if !utils.PathExists(filePath) {
 		err = os.MkdirAll(outPath, 0700)
@@ -52,7 +52,7 @@ func WriteJSONObject(obj *Object, outPath string) {
 	}
 	// writing
 	err = ioutil.WriteFile(filePath, file, 0700)
-	utils.ShowError(err, "Unable to get write object.")
+	utils.ShowError(err, "Unable to write object.")
 }
 
 // GetBoundingBox is a function to get the bounding box of an Object.
@@ -91,8 +91,15 @@ func (obj *Object) GetBoundingBox() []float64 {
 // Returns:
 //  none
 //
-func (obj *Object) FindCamera() {
-
+func (obj *Object) FindCamera(ptCamera *entity.Point) {
+	bb := obj.GetBoundingBox()
+	vList := make([]float64, 3)
+	for i := 0; i < 3; i++ {
+		vList[i] = bb[i+3] - bb[i]
+	}
+	ptTarget := entity.Point{Coordinates: vList}
+	cam := camera.InitCameraWithPoints(ptCamera, &ptTarget)
+	obj.Camera = &cam
 }
 
 // InitObject is a function to initialize an Object.

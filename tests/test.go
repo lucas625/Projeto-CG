@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/lucas625/Projeto-CG/src/general"
-
 	"github.com/lucas625/Projeto-CG/src/entity"
-
+	"github.com/lucas625/Projeto-CG/src/general"
 	"github.com/lucas625/Projeto-CG/src/io/obj"
 )
 

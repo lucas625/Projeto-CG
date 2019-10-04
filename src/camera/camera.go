@@ -69,7 +69,6 @@ func CheckLenVector(vect utils.Vector) {
 // WriteJSONCamera is a function to write all Camera data as json.
 //
 // Parameters:
-// 	obj      - a list of points.
 //  outPath - path to the output folder.
 //
 // Returns:

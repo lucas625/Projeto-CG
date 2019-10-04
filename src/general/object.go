@@ -2,6 +2,7 @@ package general
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
 	"path"
@@ -100,6 +101,43 @@ func (obj *Object) FindCamera(ptCamera *entity.Point) {
 	ptTarget := entity.Point{Coordinates: vList}
 	cam := camera.InitCameraWithPoints(ptCamera, &ptTarget)
 	obj.Camera = &cam
+}
+
+// LoadJSONCamera is a function to read all Camera data as json.
+//
+// Parameters:
+//  inPath - path to the input file.
+//  target - target point for the camera.
+//
+// Returns:
+//  none
+//
+func (obj *Object) LoadJSONCamera(inPath string) {
+	// opening the file
+	camFile, err := os.Open(inPath)
+	utils.ShowError(err, "Unable to open camera.")
+	// converting to cam
+	byteCamera, err := ioutil.ReadAll(camFile)
+	utils.ShowError(err, "Unable to convert camera file to bytes.")
+	var camAux camera.Camera
+	err = json.Unmarshal(byteCamera, &camAux)
+	utils.ShowError(err, "Failed to unmarshal camera.")
+	// Validating the camera
+	if len(camAux.Look.Coordinates) == 0 || len(camAux.Up.Coordinates) == 0 || len(camAux.Right.Coordinates) == 0 {
+		if len(camAux.Pos.Coordinates) == 3 {
+			obj.FindCamera(&(camAux.Pos))
+		} else {
+			utils.ShowError(errors.New("Invalid camera"), "Camera with vectors as empty list, but with non 3D position.")
+		}
+	} else if len(camAux.Look.Coordinates) == 3 && len(camAux.Up.Coordinates) == 3 && len(camAux.Right.Coordinates) == 3 {
+		if len(camAux.Pos.Coordinates) == 3 {
+			obj.Camera = &camAux
+		} else {
+			utils.ShowError(errors.New("Invalid camera"), "Camera with vectors with 3D position, but camera position isn't 3D.")
+		}
+	} else {
+		utils.ShowError(errors.New("Invalid camera"), "Camera with invalid vectors.")
+	}
 }
 
 // InitObject is a function to initialize an Object.

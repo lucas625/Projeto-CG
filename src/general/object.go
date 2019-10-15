@@ -107,7 +107,6 @@ func (obj *Object) FindCamera(ptCamera *entity.Point) {
 //
 // Parameters:
 //  inPath - path to the input file.
-//  target - target point for the camera.
 //
 // Returns:
 //  none

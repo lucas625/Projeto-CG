@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/lucas625/Projeto-CG/src/light"
+
 	"github.com/lucas625/Projeto-CG/src/io/obj"
 )
 
@@ -36,9 +38,11 @@ func main() {
 	}
 
 	object := obj.ReadObj(objPath)
+	cameraPath := "resources/json/camera.json"
+	object.LoadJSONCamera(cameraPath)
 
-	object.LoadJSONCamera("resources/json/camera.json")
-
-	fmt.Println(object.Camera)
+	lightPath := "resources/json/light.json"
+	light := light.LoadJSONLight(lightPath)
+	fmt.Println(*light)
 
 }

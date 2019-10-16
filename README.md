@@ -1,7 +1,7 @@
-# Computer Graphics Project
+# Light Tracer
 
 ## Table of Contents
-- [Computer Graphics Project](#computer-graphics-project)
+- [Light Tracer](#light-tracer)
   - [Table of Contents](#table-of-contents)
   - [Description](#description)
   - [Requirements](#requirements)

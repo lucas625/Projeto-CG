@@ -56,6 +56,22 @@ func WriteJSONObject(obj *Object, outPath string) {
 	utils.ShowError(err, "Unable to write object.")
 }
 
+// NormalizeNormals is a function to normalize all triangle normals.
+//
+// Parameters:
+// 	none
+//
+// Returns:
+//  none
+//
+func (obj *Object) NormalizeNormals() {
+	normals := *obj.Normals
+	for i := range *obj.Normals {
+		auxV := utils.NormalizeVector(&normals[i])
+		normals[i] = auxV
+	}
+}
+
 // GetBoundingBox is a function to get the bounding box of an Object.
 //
 // Parameters:
@@ -137,6 +153,7 @@ func (obj *Object) LoadJSONCamera(inPath string) {
 	} else {
 		utils.ShowError(errors.New("Invalid camera"), "Camera with invalid vectors.")
 	}
+	obj.Camera.NormalizeCam()
 }
 
 // InitObject is a function to initialize an Object.

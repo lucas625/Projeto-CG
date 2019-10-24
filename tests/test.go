@@ -43,6 +43,6 @@ func main() {
 
 	lightPath := "resources/json/light.json"
 	light := light.LoadJSONLight(lightPath)
-	fmt.Println(*light)
+	light.Evaluate((*object.Normals)[0], object.Camera.Pos, object.Vertices.Points[0])
 
 }

@@ -187,6 +187,6 @@ func ReadObj(objPath string) *general.Object {
 
 	err = scanner.Err()
 	utils.ShowError(err, "Error on reading file: "+absPath+".")
-
+	object.NormalizeNormals()
 	return &object
 }

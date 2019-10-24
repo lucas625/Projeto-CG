@@ -33,18 +33,29 @@ type Light struct {
 	LightPosition      entity.Point
 }
 
-// Avaliate is a function to avaliate the light at a point.
+// Evaluate is a function to evaluate the light at a point.
 //
 // Parameters:
 // 	surfaceNormal - surface normal at the point.
-//  pointToCam    - vector from the point to the camera.
+//  camPos        - position of the camera.
 //  pos           - the point.
 //
 // Returns:
 // 	the RGB value of the point
 //
-func (lgt *Light) Avaliate(surfaceNormal, pointToCam utils.Vector, pos entity.Point) {
-
+func (lgt *Light) Evaluate(surfaceNormal utils.Vector, camPos, pos entity.Point) {
+	ptToCam := entity.ExtractVector(&pos, &camPos)
+	ptToCamNormalized := utils.NormalizeVector(&ptToCam)
+	ambientalPart := utils.InitVector(3)
+	diffusePart := utils.InitVector(3)
+	// specularPart := utils.InitVector(3)
+	// calculating ambient light
+	// need to find a way to get the vector r
+	for i := 0; i < 3; i++ {
+		ambientalPart.Coordinates[i] = lgt.AmbientIntensity.Coordinates[i] * lgt.AmbientReflection.Coordinates[i]
+		diffusePart.Coordinates[i] = lgt.LightIntensity.Coordinates[i] * lgt.DiffuseReflection.Coordinates[i] * (utils.DotProduct(&surfaceNormal, &ptToCamNormalized))
+		// specularPart.Coordinates[i] = lgt.LightIntensity.Coordinates[i] * lgt.SpecularReflection
+	}
 }
 
 // LoadJSONLight is a function to read all Light data as json.

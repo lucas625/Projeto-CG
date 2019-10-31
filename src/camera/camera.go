@@ -52,10 +52,24 @@ func CamToHomogeneousMatrix(cam *Camera) utils.Matrix {
 	return maux
 }
 
+// NormalizeCam is a function to normalize the camera vectors.
+//
+// Parameters:
+//  none
+//
+// Returns:
+// 	none
+//
+func (cam *Camera) NormalizeCam() {
+	cam.Look = utils.NormalizeVector(&cam.Look)
+	cam.Right = utils.NormalizeVector(&cam.Right)
+	cam.Up = utils.NormalizeVector(&cam.Up)
+}
+
 // CheckLenVector is a function to check the length of the camera vectors.
 //
 // Parameters:
-// 	a - a vector.
+// 	vect - a vector.
 //
 // Returns:
 // 	none

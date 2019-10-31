@@ -75,7 +75,6 @@ Files:
 - The **Object** as an *.obj* file, please notice that there are a few examples available at *resorces/obj*.
 - The **Camera** as an *.json* file, the camera.json is available at *resources/json* you just need to edit it, but notice that if if you set the vectors as an empty list then the camera will use *lookat* algorithm with the camera's position and the center point of the bounding box of the object as parameters. It would be wise to let the application find the camera by itself.
 - The **Light** as an *.json* file, the light is available in the same folder that contains the **Camera**, but pay attention that you must specify all light's data for the scene.
-- The **Object's Light Properties** as an *.json* file, the Object's Light Properties is available in the same folder that contains the **Camera**, but pay attention that you must specify all light's data for the object.
 
 ## Running the Project
 

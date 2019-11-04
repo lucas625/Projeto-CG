@@ -15,7 +15,7 @@ import (
 // Camera is a class for cameras.
 //
 // Members:
-// 	Pos   - the position of the camera
+// 	Pos   - the position of the camera.
 // 	Look  - vector to were the camera is looking.
 //  Up    - vector head of the camera.
 //  Right - side vector of the camera.

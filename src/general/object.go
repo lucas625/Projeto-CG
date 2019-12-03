@@ -20,14 +20,16 @@ import (
 // 	Vertices  - pointer to a Vertices object.
 // 	Triangles - pointer to a list with all Triangles of the object.
 //  Normals   - pointer to a list of Vectors with all vertices normals.
-//  Camera    - pointer to the camera.
+//  DiffuseReflection  - RGB for how diffuse is the object.
+//  SpecularReflection - RGB for how specular is the object.
 //
 type Object struct {
-	Name      string
-	Vertices  *entity.Vertices
-	Triangles *[]entity.Triangle
-	Normals   *[]utils.Vector
-	Camera    *camera.Camera
+	Name               string
+	Vertices           *entity.Vertices
+	Triangles          *[]entity.Triangle
+	Normals            *[]utils.Vector
+	DiffuseReflection  utils.Vector
+	SpecularReflection utils.Vector
 }
 
 // WriteJSONObject is a function to write all Object data as json.

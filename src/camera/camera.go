@@ -2,6 +2,7 @@ package camera
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"os"
@@ -103,6 +104,36 @@ func (cam *Camera) WriteJSONCamera(outPath string) {
 	// writing
 	err = ioutil.WriteFile(filePath, file, 0700)
 	utils.ShowError(err, "Unable to write camera.")
+}
+
+// LoadJSONCamera is a function to read all Camera data as json.
+//
+// Parameters:
+//  inPath - path to the input file.
+//
+// Returns:
+//  the camera.
+//
+func LoadJSONCamera(inPath string) *Camera {
+	// opening the file
+	camFile, err := os.Open(inPath)
+	utils.ShowError(err, "Unable to open camera.")
+	// converting to cam
+	byteCamera, err := ioutil.ReadAll(camFile)
+	utils.ShowError(err, "Unable to convert camera file to bytes.")
+	var camAux Camera
+	err = json.Unmarshal(byteCamera, &camAux)
+	utils.ShowError(err, "Failed to unmarshal camera.")
+	// Validating the camera
+	if len(camAux.Look.Coordinates) == 3 && len(camAux.Up.Coordinates) == 3 && len(camAux.Right.Coordinates) == 3 {
+		if len(camAux.Pos.Coordinates) != 3 {
+			utils.ShowError(errors.New("Invalid camera"), "Camera with vectors with 3D position, but camera position isn't 3D.")
+		}
+	} else {
+		utils.ShowError(errors.New("Invalid camera"), "Camera with invalid vectors.")
+	}
+	camAux.NormalizeCam()
+	return &camAux
 }
 
 // InitCamera is a function to initialize a Camera.

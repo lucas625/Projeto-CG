@@ -2,7 +2,6 @@ package general
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"os"
 	"path"
@@ -105,12 +104,12 @@ func (obj *Object) GetBoundingBox() []float64 {
 // FindCamera is a function to initialize a Camera.
 //
 // Parameters:
-//  none
+//  ptCamera - the position of the camera.
 //
 // Returns:
-//  none
+//  the camera.
 //
-func (obj *Object) FindCamera(ptCamera *entity.Point) {
+func (obj *Object) FindCamera(ptCamera *entity.Point) *camera.Camera {
 	bb := obj.GetBoundingBox()
 	vList := make([]float64, 3)
 	for i := 0; i < 3; i++ {
@@ -118,44 +117,7 @@ func (obj *Object) FindCamera(ptCamera *entity.Point) {
 	}
 	ptTarget := entity.Point{Coordinates: vList}
 	cam := camera.InitCameraWithPoints(ptCamera, &ptTarget)
-	obj.Camera = &cam
-}
-
-// LoadJSONCamera is a function to read all Camera data as json.
-//
-// Parameters:
-//  inPath - path to the input file.
-//
-// Returns:
-//  none
-//
-func (obj *Object) LoadJSONCamera(inPath string) {
-	// opening the file
-	camFile, err := os.Open(inPath)
-	utils.ShowError(err, "Unable to open camera.")
-	// converting to cam
-	byteCamera, err := ioutil.ReadAll(camFile)
-	utils.ShowError(err, "Unable to convert camera file to bytes.")
-	var camAux camera.Camera
-	err = json.Unmarshal(byteCamera, &camAux)
-	utils.ShowError(err, "Failed to unmarshal camera.")
-	// Validating the camera
-	if len(camAux.Look.Coordinates) == 0 || len(camAux.Up.Coordinates) == 0 || len(camAux.Right.Coordinates) == 0 {
-		if len(camAux.Pos.Coordinates) == 3 {
-			obj.FindCamera(&(camAux.Pos))
-		} else {
-			utils.ShowError(errors.New("Invalid camera"), "Camera with vectors as empty list, but with non 3D position.")
-		}
-	} else if len(camAux.Look.Coordinates) == 3 && len(camAux.Up.Coordinates) == 3 && len(camAux.Right.Coordinates) == 3 {
-		if len(camAux.Pos.Coordinates) == 3 {
-			obj.Camera = &camAux
-		} else {
-			utils.ShowError(errors.New("Invalid camera"), "Camera with vectors with 3D position, but camera position isn't 3D.")
-		}
-	} else {
-		utils.ShowError(errors.New("Invalid camera"), "Camera with invalid vectors.")
-	}
-	obj.Camera.NormalizeCam()
+	return &cam
 }
 
 // InitObject is a function to initialize an Object.
@@ -169,7 +131,7 @@ func (obj *Object) LoadJSONCamera(inPath string) {
 //  normals   - list of normal vectors.
 //  cam       - the cam to the object.
 //
-func InitObject(name string, vertices *entity.Vertices, triangles *[]entity.Triangle, normals *[]utils.Vector, cam *camera.Camera) Object {
-	obj := Object{Name: name, Vertices: vertices, Triangles: triangles, Normals: normals, Camera: cam}
+func InitObject(name string, vertices *entity.Vertices, triangles *[]entity.Triangle, normals *[]utils.Vector, diffuseReflection, specularReflection utils.Vector) Object {
+	obj := Object{Name: name, Vertices: vertices, Triangles: triangles, Normals: normals, DiffuseReflection: diffuseReflection, SpecularReflection: specularReflection}
 	return obj
 }

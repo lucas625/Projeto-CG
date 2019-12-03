@@ -113,7 +113,7 @@ func readLine(line string) (int, *[]byte) {
 //  triangles - pointer to list of triangles.
 //  normals   - pointer to list of normal vectors.
 //
-func readLines(scanner *bufio.Scanner) (*entity.Vertices, *[]entity.Triangle, *[]utils.Vector) {
+func readLines(scanner *bufio.Scanner) (entity.Vertices, []entity.Triangle, []utils.Vector) {
 	var pointList []entity.Point
 	var triangles []entity.Triangle
 	var normals []utils.Vector
@@ -139,7 +139,7 @@ func readLines(scanner *bufio.Scanner) (*entity.Vertices, *[]entity.Triangle, *[
 		}
 	}
 	vertices := entity.InitVertices(pointList)
-	return &vertices, &triangles, &normals
+	return vertices, triangles, normals
 }
 
 // getName is a function to get the name of an .obj file.
@@ -183,7 +183,11 @@ func ReadObj(objPath string) *general.Object {
 	scanner := bufio.NewScanner(file)
 	vertices, triangles, normals := readLines(scanner)
 	name := getName(objPath)
-	object := general.InitObject(name, vertices, triangles, normals, nil)
+
+	diffuseReflection := utils.InitVector(3)
+	specularReflection := utils.InitVector(3)
+
+	object := general.InitObject(name, vertices, triangles, normals, diffuseReflection, specularReflection)
 
 	err = scanner.Err()
 	utils.ShowError(err, "Error on reading file: "+absPath+".")

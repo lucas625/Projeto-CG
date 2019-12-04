@@ -2,47 +2,73 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
+	"strconv"
 
-	"github.com/lucas625/Projeto-CG/src/light"
+	"github.com/lucas625/Projeto-CG/src/utils"
 
+	"github.com/lucas625/Projeto-CG/src/camera"
+	"github.com/lucas625/Projeto-CG/src/general"
 	"github.com/lucas625/Projeto-CG/src/io/obj"
+	"github.com/lucas625/Projeto-CG/src/light"
 )
 
 func main() {
+	ended := false
+	objList := make([]general.Object, 0, 10)
+	current := 0
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Enter the path to a .obj file: ")
-	objPath, _ := reader.ReadString('\n')
-	objPath = objPath[:len(objPath)-1] // removing \n
-	switch objPath {                   //test cases
-	case "-1":
-		objPath = "resources/obj/simple/cone.obj"
-	case "-2":
-		objPath = "resources/obj/simple/cube.obj"
-	case "-3":
-		objPath = "resources/obj/simple/plane.obj"
-	case "-4":
-		objPath = "resources/obj/complex/horned_ball.obj"
-	case "-5":
-		objPath = "resources/obj/complex/monkey_with_cube.obj"
-	case "-6":
-		objPath = "resources/obj/complex/spikedball.obj"
+	for !ended {
+		fmt.Print("Enter the path to a .obj file: ")
+		objPath, _ := reader.ReadString('\n')
+		obi, err := strconv.Atoi(objPath[:len(objPath)-2]) // removing \n
+		utils.ShowError(err, "fail")
+		switch obi { //test cases
+		case 1:
+			objPath = "resources/obj/simple/cone.obj"
+		case 2:
+			objPath = "resources/obj/simple/cube.obj"
+		case 3:
+			objPath = "resources/obj/simple/plane.obj"
+		case 4:
+			objPath = "resources/obj/complex/horned_ball.obj"
+		case 5:
+			objPath = "resources/obj/complex/monkey_with_cube.obj"
+		case 6:
+			objPath = "resources/obj/complex/spikedball.obj"
+		case 0:
+			if current > 1 {
+				ended = true
+				continue
+			} else {
+				utils.ShowError(errors.New("Need at least one object"), "Try again")
+			}
+		}
+
+		object := obj.ReadObj(objPath)
+		objList = append(objList, *object)
+		current++
 	}
 
 	fmt.Print("Enter the path to the output folder: ")
 	outPath, _ := reader.ReadString('\n')
-	outPath = outPath[:len(outPath)-1] // removing \n
+	outPath = outPath[:len(outPath)-2] // removing \n
 	if outPath == "-1" {               // test case
 		outPath = "out/"
 	}
 
-	object := obj.ReadObj(objPath)
+	objects := general.InitObjects("teste", objList)
+	objects.WriteJSONObjects(outPath)
+
 	cameraPath := "resources/json/camera.json"
-	object.LoadJSONCamera(cameraPath)
+	cam := camera.LoadJSONCamera(cameraPath)
+	cam = objects.ObjList[0].FindCamera(&cam.Pos)
+	cam.WriteJSONCamera(outPath)
 
 	lightPath := "resources/json/light.json"
-	light := light.LoadJSONLight(lightPath)
-	light.Evaluate((*object.Normals)[0], object.Camera.Pos, object.Vertices.Points[0])
+	lights := light.LoadJSONLights(lightPath)
+	lights.WriteJSONLights(outPath)
 
 }

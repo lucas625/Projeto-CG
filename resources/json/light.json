@@ -1,45 +1,36 @@
 {
-	"AmbientIntensity": {
-		"Coordinates": [
-			20,
-			50,
-			40
-		]
-	},
-	"AmbientReflection": {
-		"Coordinates": [
-			1,
-			1,
-			1
-		]
-	},
-	"LightIntensity": {
-		"Coordinates": [
-			200,
-			150,
-			100
-		]
-	},
-	"DiffuseReflection": {
-		"Coordinates": [
-			0.25,
-			0.5,
-			0.5
-		]
-	},
-	"SpecularReflection": {
-		"Coordinates": [
-			0.75,
-			0,
-			0
-		]
-	},
-	"SpecularDecay": 100,
-	"LightPosition": {
-		"Coordinates": [
-			10,
-			15,
-			25
-		]
-	}
+	"LightList": [
+		{
+			"AmbientIntensity": {
+				"Coordinates": [
+					20,
+					50,
+					40
+				]
+			},
+			"AmbientReflection": {
+				"Coordinates": [
+					1,
+					1,
+					1
+				]
+			},
+			"LightIntensity": {
+				"Coordinates": [
+					200,
+					150,
+					100
+				]
+			},
+			"SpecularDecay": 100,
+			"LightPosition": {
+				"Coordinates": [
+					10,
+					15,
+					25
+				]
+			},
+			"Radius": 0
+		}
+	]
 }

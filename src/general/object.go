@@ -2,6 +2,7 @@ package general
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
 	"path"
@@ -113,6 +114,30 @@ type Object struct {
 //  none
 //
 func (obj *Object) CheckIntegrity() {
+	for _, vertice := range obj.Vertices.Points {
+		if len(vertice.Coordinates) != 3 {
+			utils.ShowError(errors.New("Invalid object"), "Vertices length not equal 3.")
+		}
+	}
+	for _, triangle := range obj.Triangles {
+		if len(triangle.Vertices) != 3 {
+			utils.ShowError(errors.New("Invalid object"), "Triangle with number of vertices not equal 3.")
+		}
+		if len(triangle.Normals) != 3 {
+			utils.ShowError(errors.New("Invalid object"), "Triangle with number of normals not equal 3.")
+		}
+	}
+	for _, normal := range obj.Normals {
+		if len(normal.Coordinates) != 3 {
+			utils.ShowError(errors.New("Invalid object"), "Normal length not equal 3.")
+		}
+	}
+	if len(obj.DiffuseReflection.Coordinates) != 3 {
+		utils.ShowError(errors.New("Invalid object"), "Diffuse Reflection length not equal 3.")
+	}
+	if len(obj.SpecularReflection.Coordinates) != 3 {
+		utils.ShowError(errors.New("Invalid object"), "Specular Reflection length not equal 3.")
+	}
 
 }
 

@@ -27,8 +27,8 @@ type Light struct {
 	AmbientReflection utils.Vector
 	LightIntensity    utils.Vector
 	SpecularDecay     float64
-	Radius            float64
 	LightPosition     entity.Point
+	Radius            float64
 }
 
 // Evaluate is a function to evaluate the light at a point.

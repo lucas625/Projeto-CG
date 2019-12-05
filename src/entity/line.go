@@ -2,6 +2,7 @@ package entity
 
 import (
 	"errors"
+	"fmt"
 	"math"
 
 	"github.com/lucas625/Projeto-CG/src/utils"
@@ -101,9 +102,53 @@ func (line Line) IntersectSphere(sphere Sphere) ([]float64, bool) {
 
 	values = append(values, v1)
 	if v1 != v2 {
-		values := append(values, v2)
+		values = append(values, v2)
 	}
 	return values, true
+}
+
+// FindBaricentricCoordinates is a function to find the baricentric coordinates of a point.
+//
+// Parameters:
+// 	triang - a list of 3 points.
+//  pos    - the target point.
+//
+// Returns:
+//  The 3 baricentric coordinates.
+//
+func FindBaricentricCoordinates(triang []Point, pos Point) []float64 {
+	baricenter := InitPoint(3)
+
+	for i := 0; i < 3; i++ {
+		for j := 0; j < 3; j++ {
+			baricenter.Coordinates[i] += (1 / 3) * triang[j].Coordinates[i]
+		}
+	}
+	AB := ExtractVector(&triang[0], &triang[1])
+	AC := ExtractVector(&triang[0], &triang[2])
+	fmt.Println(AB, AC)
+
+	PA := ExtractVector(&baricenter, &triang[0])
+	PB := ExtractVector(&baricenter, &triang[1])
+	PC := ExtractVector(&baricenter, &triang[2])
+	fmt.Println(PA, PB, PC)
+
+	normal := utils.VectorCrossProduct(&AB, &AC)
+	AreaABC := utils.VectorNorm(&normal) / 2
+
+	normalA := utils.VectorCrossProduct(&PB, &PC)
+	normalB := utils.VectorCrossProduct(&PC, &PA)
+
+	AreaA := utils.VectorNorm(&normalA) / 2
+	AreaB := utils.VectorNorm(&normalB) / 2
+
+	alpha := AreaA / AreaABC
+	beta := AreaB / AreaABC
+	gama := 1 - alpha - beta
+
+	coordinates := []float64{alpha, beta, gama}
+	return coordinates
+
 }
 
 // IntersectTriangle is a function to intersect triangles.
@@ -115,10 +160,12 @@ func (line Line) IntersectSphere(sphere Sphere) ([]float64, bool) {
 //  The line t parameter (A + tV).
 //  A flag checking if has intersection.
 //
-func (line Line) IntersectTriangle(triang []Point) (Point, float64, bool) {
+func (line Line) IntersectTriangle(triang []Point) (float64, bool) {
 	if len(triang) != 3 {
-		utils.ShowError(errors.New("Invalid Intersection"), "Triangle with number of edges different than 3")
+		utils.ShowError(errors.New("Invalid Intersection"), "Triangle with number of vertices different than 3")
 	}
-	plane := ExtractPlane(triang[0], triang[1], triang[2])
-	t, intersectPlane, planeContains := line.IntersectPlane(plane)
+	// plane := ExtractPlane(triang[0], triang[1], triang[2])
+	// t, intersectPlane, planeContains := line.IntersectPlane(plane)
+
+	return 0, false
 }

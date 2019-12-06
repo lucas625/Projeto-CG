@@ -2,7 +2,6 @@ package entity
 
 import (
 	"errors"
-	"fmt"
 	"math"
 
 	"github.com/lucas625/Projeto-CG/src/utils"
@@ -90,15 +89,15 @@ func (line Line) IntersectSphere(sphere Sphere) ([]float64, bool) {
 	k := line.Start.Coordinates[2] - sphere.Center.Coordinates[2]
 
 	t0 := math.Pow(i, 2) + math.Pow(j, 2) + math.Pow(k, 2) - math.Pow(sphere.Radius, 2)
-	t1 := 2 * ((line.Director.Coordinates[0] * i) + (line.Director.Coordinates[0] * j) + (line.Director.Coordinates[0] * k))
+	t1 := 2 * ((line.Director.Coordinates[0] * i) + (line.Director.Coordinates[1] * j) + (line.Director.Coordinates[2] * k))
 	t2 := math.Pow(line.Director.Coordinates[0], 2) + math.Pow(line.Director.Coordinates[1], 2) + math.Pow(line.Director.Coordinates[2], 2)
 
 	delta := math.Pow(t1, 2) - (4 * t2 * t0)
 	if delta < 0 {
 		return values, false
 	}
-	v1 := ((t1 * -1) + math.Pow(delta, 1/2)) / (2 * t2)
-	v2 := ((t1 * -1) - math.Pow(delta, 1/2)) / (2 * t2)
+	v1 := ((t1 * -1) + math.Pow(delta, 0.5)) / (2 * t2)
+	v2 := ((t1 * -1) - math.Pow(delta, 0.5)) / (2 * t2)
 
 	values = append(values, v1)
 	if v1 != v2 {
@@ -117,21 +116,13 @@ func (line Line) IntersectSphere(sphere Sphere) ([]float64, bool) {
 //  The 3 baricentric coordinates.
 //
 func FindBaricentricCoordinates(triang []Point, pos Point) []float64 {
-	baricenter := InitPoint(3)
 
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
-			baricenter.Coordinates[i] += (1 / 3) * triang[j].Coordinates[i]
-		}
-	}
 	AB := ExtractVector(&triang[0], &triang[1])
 	AC := ExtractVector(&triang[0], &triang[2])
-	fmt.Println(AB, AC)
 
-	PA := ExtractVector(&baricenter, &triang[0])
-	PB := ExtractVector(&baricenter, &triang[1])
-	PC := ExtractVector(&baricenter, &triang[2])
-	fmt.Println(PA, PB, PC)
+	PA := ExtractVector(&pos, &triang[0])
+	PB := ExtractVector(&pos, &triang[1])
+	PC := ExtractVector(&pos, &triang[2])
 
 	normal := utils.VectorCrossProduct(&AB, &AC)
 	AreaABC := utils.VectorNorm(&normal) / 2
@@ -158,14 +149,33 @@ func FindBaricentricCoordinates(triang []Point, pos Point) []float64 {
 //
 // Returns:
 //  The line t parameter (A + tV).
+//  The baricentric coordinates at that point
 //  A flag checking if has intersection.
 //
-func (line Line) IntersectTriangle(triang []Point) (float64, bool) {
+func (line Line) IntersectTriangle(triang []Point) (float64, []float64, bool) {
 	if len(triang) != 3 {
 		utils.ShowError(errors.New("Invalid Intersection"), "Triangle with number of vertices different than 3")
 	}
-	// plane := ExtractPlane(triang[0], triang[1], triang[2])
-	// t, intersectPlane, planeContains := line.IntersectPlane(plane)
+	plane := ExtractPlane(triang[0], triang[1], triang[2])
+	t, intersectPlane, planeContains := line.IntersectPlane(plane)
 
-	return 0, false
+	if !(planeContains || !intersectPlane) {
+		pos := line.FindPos(t)
+		Bcoords := FindBaricentricCoordinates(triang, pos)
+		outside := false
+		for _, coord := range Bcoords {
+			if coord > 1 || coord < 0 {
+				outside = true
+			}
+		}
+
+		if outside {
+			return 0, []float64{0, 0, 0}, false
+		}
+
+		return t, Bcoords, true
+
+	}
+
+	return 0, []float64{0, 0, 0}, false
 }

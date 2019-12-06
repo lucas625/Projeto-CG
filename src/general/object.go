@@ -13,39 +13,32 @@ import (
 	"github.com/lucas625/Projeto-CG/src/utils"
 )
 
-// Object is a class for all data of an object.
+// Objects is a class for all objects.
 //
 // Members:
-//  Name      - the name of the object.
-// 	Vertices  - pointer to a Vertices object.
-// 	Triangles - pointer to a list with all Triangles of the object.
-//  Normals   - pointer to a list of Vectors with all vertices normals.
-//  Camera    - pointer to the camera.
+// Label   - the label.
+// ObjList - a list of objects.
 //
-type Object struct {
-	Name      string
-	Vertices  *entity.Vertices
-	Triangles *[]entity.Triangle
-	Normals   *[]utils.Vector
-	Camera    *camera.Camera
+type Objects struct {
+	Label   string
+	ObjList []Object
 }
 
-// WriteJSONObject is a function to write all Object data as json.
+// WriteJSONObjects is a function to write all Object data as json.
 //
 // Parameters:
-// 	obj      - a list of points.
 //  outPath - path to the output folder.
 //
 // Returns:
 //  none
 //
-func WriteJSONObject(obj *Object, outPath string) {
+func (objs *Objects) WriteJSONObjects(outPath string) {
 	// creating the json
-	file, err := json.MarshalIndent(*obj, "", "	")
+	file, err := json.MarshalIndent(*objs, "", "	")
 	utils.ShowError(err, "Unable to convert object to json.")
 	// getting the right path
-	filePath, err := filepath.Abs(path.Join(outPath, obj.Name+".json"))
-	utils.ShowError(err, "Unable to get object's absolute path.")
+	filePath, err := filepath.Abs(path.Join(outPath, objs.Label+".json"))
+	utils.ShowError(err, "Unable to get objects's absolute path.")
 	// creating the folder if it doesn't exists.
 	if !utils.PathExists(filePath) {
 		err = os.MkdirAll(outPath, 0700)
@@ -53,7 +46,99 @@ func WriteJSONObject(obj *Object, outPath string) {
 	}
 	// writing
 	err = ioutil.WriteFile(filePath, file, 0700)
-	utils.ShowError(err, "Unable to write object.")
+	utils.ShowError(err, "Unable to write objects.")
+}
+
+// LoadJSONObjects is a function to read all Objects data as json.
+//
+// Parameters:
+//  inPath - path to the input file.
+//
+// Returns:
+//  the objects.
+//
+func LoadJSONObjects(inPath string) *Objects {
+	// opening the file
+	objsFile, err := os.Open(inPath)
+	utils.ShowError(err, "Unable to open objects.")
+	// converting to cam
+	byteCamera, err := ioutil.ReadAll(objsFile)
+	utils.ShowError(err, "Unable to convert objects file to bytes.")
+	var objsAux Objects
+	err = json.Unmarshal(byteCamera, &objsAux)
+	utils.ShowError(err, "Failed to unmarshal objects.")
+	for _, obj := range objsAux.ObjList {
+		obj.CheckIntegrity()
+	}
+	return &objsAux
+}
+
+// InitObjects is a function to initialize a objects.
+//
+// Parameters:
+//  none
+//
+// Returns:
+//  a objects.
+//
+func InitObjects(label string, objlist []Object) *Objects {
+	objs := Objects{Label: label, ObjList: objlist}
+	return &objs
+}
+
+// Object is a class for all data of an object.
+//
+// Members:
+//  Name      - the name of the object.
+// 	Vertices  - pointer to a Vertices object.
+// 	Triangles - pointer to a list with all Triangles of the object.
+//  Normals   - pointer to a list of Vectors with all vertices normals.
+//  DiffuseReflection  - RGB for how diffuse is the object.
+//  SpecularReflection - RGB for how specular is the object.
+//
+type Object struct {
+	Name               string
+	Vertices           entity.Vertices
+	Triangles          []entity.Triangle
+	Normals            []utils.Vector
+	DiffuseReflection  utils.Vector
+	SpecularReflection utils.Vector
+}
+
+// CheckIntegrity is a function to check the attributes of an object.
+//
+// Parameters:
+// 	none
+//
+// Returns:
+//  none
+//
+func (obj *Object) CheckIntegrity() {
+	for _, vertice := range obj.Vertices.Points {
+		if len(vertice.Coordinates) != 3 {
+			utils.ShowError(errors.New("Invalid object"), "Vertices length not equal 3.")
+		}
+	}
+	for _, triangle := range obj.Triangles {
+		if len(triangle.Vertices) != 3 {
+			utils.ShowError(errors.New("Invalid object"), "Triangle with number of vertices not equal 3.")
+		}
+		if len(triangle.Normals) != 3 {
+			utils.ShowError(errors.New("Invalid object"), "Triangle with number of normals not equal 3.")
+		}
+	}
+	for _, normal := range obj.Normals {
+		if len(normal.Coordinates) != 3 {
+			utils.ShowError(errors.New("Invalid object"), "Normal length not equal 3.")
+		}
+	}
+	if len(obj.DiffuseReflection.Coordinates) != 3 {
+		utils.ShowError(errors.New("Invalid object"), "Diffuse Reflection length not equal 3.")
+	}
+	if len(obj.SpecularReflection.Coordinates) != 3 {
+		utils.ShowError(errors.New("Invalid object"), "Specular Reflection length not equal 3.")
+	}
+
 }
 
 // NormalizeNormals is a function to normalize all triangle normals.
@@ -65,10 +150,10 @@ func WriteJSONObject(obj *Object, outPath string) {
 //  none
 //
 func (obj *Object) NormalizeNormals() {
-	normals := *obj.Normals
-	for i := range *obj.Normals {
+	normals := obj.Normals
+	for i := range obj.Normals {
 		auxV := utils.NormalizeVector(&normals[i])
-		normals[i] = auxV
+		obj.Normals[i] = auxV
 	}
 }
 
@@ -103,12 +188,12 @@ func (obj *Object) GetBoundingBox() []float64 {
 // FindCamera is a function to initialize a Camera.
 //
 // Parameters:
-//  none
+//  ptCamera - the position of the camera.
 //
 // Returns:
-//  none
+//  the camera.
 //
-func (obj *Object) FindCamera(ptCamera *entity.Point) {
+func (obj *Object) FindCamera(ptCamera *entity.Point) *camera.Camera {
 	bb := obj.GetBoundingBox()
 	vList := make([]float64, 3)
 	for i := 0; i < 3; i++ {
@@ -116,58 +201,23 @@ func (obj *Object) FindCamera(ptCamera *entity.Point) {
 	}
 	ptTarget := entity.Point{Coordinates: vList}
 	cam := camera.InitCameraWithPoints(ptCamera, &ptTarget)
-	obj.Camera = &cam
-}
-
-// LoadJSONCamera is a function to read all Camera data as json.
-//
-// Parameters:
-//  inPath - path to the input file.
-//
-// Returns:
-//  none
-//
-func (obj *Object) LoadJSONCamera(inPath string) {
-	// opening the file
-	camFile, err := os.Open(inPath)
-	utils.ShowError(err, "Unable to open camera.")
-	// converting to cam
-	byteCamera, err := ioutil.ReadAll(camFile)
-	utils.ShowError(err, "Unable to convert camera file to bytes.")
-	var camAux camera.Camera
-	err = json.Unmarshal(byteCamera, &camAux)
-	utils.ShowError(err, "Failed to unmarshal camera.")
-	// Validating the camera
-	if len(camAux.Look.Coordinates) == 0 || len(camAux.Up.Coordinates) == 0 || len(camAux.Right.Coordinates) == 0 {
-		if len(camAux.Pos.Coordinates) == 3 {
-			obj.FindCamera(&(camAux.Pos))
-		} else {
-			utils.ShowError(errors.New("Invalid camera"), "Camera with vectors as empty list, but with non 3D position.")
-		}
-	} else if len(camAux.Look.Coordinates) == 3 && len(camAux.Up.Coordinates) == 3 && len(camAux.Right.Coordinates) == 3 {
-		if len(camAux.Pos.Coordinates) == 3 {
-			obj.Camera = &camAux
-		} else {
-			utils.ShowError(errors.New("Invalid camera"), "Camera with vectors with 3D position, but camera position isn't 3D.")
-		}
-	} else {
-		utils.ShowError(errors.New("Invalid camera"), "Camera with invalid vectors.")
-	}
-	obj.Camera.NormalizeCam()
+	return &cam
 }
 
 // InitObject is a function to initialize an Object.
 //
 // Parameters:
-// 	points - a list of points.
+//  name               - the name of the object.
+// 	vertices           - Vertices object with all points.
+//  triangles          - list of triangles.
+//  normals            - list of normal vectors.
+//  diffuseReflection  - the cam to the object.
+//  specularReflection - the specular reflection of the object.
 //
 // Returns:
-//  vertices  - Vertices object with all points.
-//  triangles - list of triangles.
-//  normals   - list of normal vectors.
-//  cam       - the cam to the object.
+//  the object.
 //
-func InitObject(name string, vertices *entity.Vertices, triangles *[]entity.Triangle, normals *[]utils.Vector, cam *camera.Camera) Object {
-	obj := Object{Name: name, Vertices: vertices, Triangles: triangles, Normals: normals, Camera: cam}
+func InitObject(name string, vertices entity.Vertices, triangles []entity.Triangle, normals []utils.Vector, diffuseReflection, specularReflection utils.Vector) Object {
+	obj := Object{Name: name, Vertices: vertices, Triangles: triangles, Normals: normals, DiffuseReflection: diffuseReflection, SpecularReflection: specularReflection}
 	return obj
 }

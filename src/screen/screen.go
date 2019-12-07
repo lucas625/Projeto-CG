@@ -76,7 +76,7 @@ func (sc *Screen) PixelToCamera(x, y int, d float64, cam *camera.Camera, px, py 
 
 	aspectRatio := float64(sc.Width) / float64(sc.Height)
 	alpha := float64(90) // field of view
-	z := cam.Pos.Coordinates[3]
+	z := cam.Pos.Coordinates[2]
 	if d > 0 {
 		alpha = math.Atan(1/d) * 2
 		z = z + d

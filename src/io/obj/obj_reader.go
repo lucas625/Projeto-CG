@@ -32,6 +32,8 @@ func readTriangle(line string) *[]byte {
 		utils.ShowError(err, "Unable to convert to vertex index to int.")
 		normals[i], err = strconv.Atoi(splitedIndices[len(splitedIndices)-1])
 		utils.ShowError(err, "Unable to convert to normal index to int.")
+		vertices[i] = vertices[i] - 1
+		normals[i] = normals[i] - 1
 	}
 	triangle := entity.InitTriangle(vertices, normals)
 	triangleAsBytes, err := json.Marshal(triangle)

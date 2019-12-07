@@ -93,16 +93,14 @@ func InitObjects(label string, objlist []Object) *Objects {
 // 	Vertices  - pointer to a Vertices object.
 // 	Triangles - pointer to a list with all Triangles of the object.
 //  Normals   - pointer to a list of Vectors with all vertices normals.
-//  DiffuseReflection  - RGB for how diffuse is the object.
-//  SpecularReflection - RGB for how specular is the object.
+//  Color     - RGB for the color of the object.
 //
 type Object struct {
-	Name               string
-	Vertices           entity.Vertices
-	Triangles          []entity.Triangle
-	Normals            []utils.Vector
-	DiffuseReflection  utils.Vector
-	SpecularReflection utils.Vector
+	Name      string
+	Vertices  entity.Vertices
+	Triangles []entity.Triangle
+	Normals   []utils.Vector
+	Color     []int
 }
 
 // CheckIntegrity is a function to check the attributes of an object.
@@ -132,11 +130,8 @@ func (obj *Object) CheckIntegrity() {
 			utils.ShowError(errors.New("Invalid object"), "Normal length not equal 3.")
 		}
 	}
-	if len(obj.DiffuseReflection.Coordinates) != 3 {
-		utils.ShowError(errors.New("Invalid object"), "Diffuse Reflection length not equal 3.")
-	}
-	if len(obj.SpecularReflection.Coordinates) != 3 {
-		utils.ShowError(errors.New("Invalid object"), "Specular Reflection length not equal 3.")
+	if len(obj.Color) != 3 {
+		utils.ShowError(errors.New("Invalid object"), "Color length not equal 3.")
 	}
 
 }
@@ -207,17 +202,16 @@ func (obj *Object) FindCamera(ptCamera *entity.Point) *camera.Camera {
 // InitObject is a function to initialize an Object.
 //
 // Parameters:
-//  name               - the name of the object.
-// 	vertices           - Vertices object with all points.
-//  triangles          - list of triangles.
-//  normals            - list of normal vectors.
-//  diffuseReflection  - the cam to the object.
-//  specularReflection - the specular reflection of the object.
+//  name      - the name of the object.
+// 	vertices  - Vertices object with all points.
+//  triangles - list of triangles.
+//  normals   - list of normal vectors.
+//  color     - the color of the object.
 //
 // Returns:
 //  the object.
 //
-func InitObject(name string, vertices entity.Vertices, triangles []entity.Triangle, normals []utils.Vector, diffuseReflection, specularReflection utils.Vector) Object {
-	obj := Object{Name: name, Vertices: vertices, Triangles: triangles, Normals: normals, DiffuseReflection: diffuseReflection, SpecularReflection: specularReflection}
+func InitObject(name string, vertices entity.Vertices, triangles []entity.Triangle, normals []utils.Vector, color []int) Object {
+	obj := Object{Name: name, Vertices: vertices, Triangles: triangles, Normals: normals, Color: color}
 	return obj
 }

@@ -149,7 +149,7 @@ func FindBaricentricCoordinates(triang []Point, pos Point) []float64 {
 //
 // Returns:
 //  The line t parameter (A + tV).
-//  The baricentric coordinates at that point
+//  The baricentric coordinates at that point.
 //  A flag checking if has intersection.
 //
 func (line Line) IntersectTriangle(triang []Point) (float64, []float64, bool) {

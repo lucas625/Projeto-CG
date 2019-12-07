@@ -10,6 +10,35 @@ import (
 	"github.com/lucas625/Projeto-CG/src/utils"
 )
 
+// ColoredScreen is a class for image screen with colors.
+//
+// Members:
+// 	Colors - the color matrix.
+//
+type ColoredScreen struct {
+	Colors [][][]int
+	Screen
+}
+
+// InitColoredScreen is a function to initialize a colored screen.
+//
+// Parameters:
+// 	screen - the screen.
+//
+// Returns:
+// 	a colored Screen.
+//
+func InitColoredScreen(width, height int) ColoredScreen {
+	colors := make([][][]int, width)
+	for i := 0; i < width; i++ {
+		colors[i] = make([][]int, height)
+		for j := 0; j < height; j++ {
+			colors[i][j] = make([]int, 3)
+		}
+	}
+	return ColoredScreen{Screen: Screen{Width: width, Height: height}, Colors: colors}
+}
+
 // Screen is a class for image screen.
 //
 // Members:
@@ -28,17 +57,19 @@ type Screen struct {
 //  y   - position of the pixel.
 //  d   - distance viewport to cam (if negative, considered as 1).
 //  cam - the camera.
+//  px  - the additional on x (0->1)
+//  py  - the additional on y (0->1)
 //
 // Returns:
 // 	a Point.
 //
-func (sc *Screen) PixelToCamera(x, y int, d float64, cam *camera.Camera) entity.Point {
+func (sc *Screen) PixelToCamera(x, y int, d float64, cam *camera.Camera, px, py float64) entity.Point {
 	if x >= sc.Width || y >= sc.Height {
 		utils.ShowError(errors.New("Invalid Pixel"), "X("+strconv.Itoa(x)+") or Y("+strconv.Itoa(y)+") invalid for screen("+strconv.Itoa(sc.Width)+", "+strconv.Itoa(sc.Height)+").")
 	}
 
-	NDCx := (float64(x) + 0.5) / float64(sc.Width)
-	NDCy := (float64(y) + 0.5) / float64(sc.Height)
+	NDCx := (float64(x) + px) / float64(sc.Width)
+	NDCy := (float64(y) + py) / float64(sc.Height)
 
 	screenx := (2 * NDCx) - 1
 	screeny := 1 - (2 * NDCy)
@@ -76,6 +107,6 @@ func InitScreen(width, height int) Screen {
 	if width < 0 || height < 0 {
 		utils.ShowError(errors.New("Invalid Screen"), "width("+strconv.Itoa(width)+") or height("+strconv.Itoa(height)+") invalid for screen.")
 	}
-	sc := Screen{width: width, height: height}
+	sc := Screen{Width: width, Height: height}
 	return sc
 }

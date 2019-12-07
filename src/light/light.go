@@ -109,45 +109,6 @@ type Light struct {
 	Radius            float64
 }
 
-// Evaluate is a function to evaluate the light at a point.
-//
-// Parameters:
-// 	surfaceNormal - surface normal at the point.
-//  camPos        - position of the camera.
-//  pos           - the point.
-//
-// Returns:
-// 	the RGB value of the point as a vector.
-//
-// func (lgt *Light) Evaluate(surfaceNormal utils.Vector, camPos, pos entity.Point) utils.Vector {
-// 	// pt to cam vector
-// 	ptToCam := entity.ExtractVector(&pos, &camPos)
-// 	ptToCamNormalized := utils.NormalizeVector(&ptToCam)
-// 	// pt to light
-// 	lgtPos := lgt.LightPosition
-// 	ptToLight := entity.ExtractVector(&pos, &lgtPos)
-// 	ptToLightNormalized := utils.NormalizeVector(&ptToLight)
-// 	// R vector
-// 	vectorRAux := utils.CMultVector(&surfaceNormal, 2*utils.DotProduct(&surfaceNormal, &ptToLight))
-// 	vectorR := utils.SumVector(&vectorRAux, &ptToLightNormalized, 1, -1)
-// 	vectorRNormalized := utils.NormalizeVector(&vectorR)
-// 	// calculating light
-// 	ambientalPart := utils.InitVector(3)
-// 	diffusePart := utils.InitVector(3)
-// 	specularPart := utils.InitVector(3)
-// 	// auxiliars
-// 	cosO := utils.DotProduct(&surfaceNormal, &ptToLightNormalized)
-// 	cosAWithDecay := math.Pow(utils.DotProduct(&vectorRNormalized, &ptToCamNormalized), lgt.SpecularDecay)
-// 	for i := 0; i < 3; i++ {
-// 		ambientalPart.Coordinates[i] = lgt.AmbientIntensity.Coordinates[i] * lgt.AmbientReflection.Coordinates[i]
-// 		diffusePart.Coordinates[i] = lgt.LightIntensity.Coordinates[i] * lgt.DiffuseReflection.Coordinates[i] * cosO
-// 		specularPart.Coordinates[i] = lgt.LightIntensity.Coordinates[i] * lgt.SpecularReflection.Coordinates[i] * cosAWithDecay
-// 	}
-// 	lightAD := utils.SumVector(&ambientalPart, &diffusePart, 1, 1)
-// 	resultingLight := utils.SumVector(&lightAD, &specularPart, 1, 1)
-// 	return resultingLight
-// }
-
 // InitLight is a function to initialize a Light.
 //
 // Parameters:

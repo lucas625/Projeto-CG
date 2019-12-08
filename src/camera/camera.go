@@ -53,6 +53,33 @@ func CamToHomogeneousMatrix(cam *Camera) utils.Matrix {
 	return maux
 }
 
+// CamToWorld is a function to create the matrix of camera to world.
+//
+// Parameters:
+// 	cam - a Camera.
+//
+// Returns:
+// 	a Matrix.
+//
+func CamToWorld(cam *Camera) utils.Matrix {
+	maux := utils.InitMatrix(3, 3)
+	// placing vectors on the matrix on the right form
+	for j := 0; j < 3; j++ {
+		maux.Values[j][0] = cam.Right.Coordinates[j]
+		maux.Values[j][1] = cam.Up.Coordinates[j]
+		maux.Values[j][2] = cam.Look.Coordinates[j]
+	}
+	// adding homogeneous and translation
+	maux.Values = append(maux.Values, []float64{0, 0, 0, 1})
+	pValues := cam.Pos.Coordinates
+	for i := 0; i < 3; i++ {
+		maux.Values[i] = append(maux.Values[i], pValues[i])
+	}
+	maux.Lines++
+	maux.Columns++
+	return maux
+}
+
 // NormalizeCam is a function to normalize the camera vectors.
 //
 // Parameters:

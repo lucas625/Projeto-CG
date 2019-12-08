@@ -29,14 +29,14 @@ type RayCaster struct {
 //
 // Parameters:
 //  coloredScreen - the screen to be painted.
-// 	i             - pixel line index.
-//  j             - pixel column index.
+// 	lp             - pixel line index.
+//  cp             - pixel column index.
 //
 // Returns:
 // 	the colored screen painted at that position.
 //
-func (rcaster *RayCaster) TraceRay(coloredScreen *screen.ColoredScreen, i, j int) {
-	screenPoint := rcaster.PixelScreen.PixelToCamera(i, j, 1.0, rcaster.Cam, 0.5, 0.5)
+func (rcaster *RayCaster) TraceRay(coloredScreen *screen.ColoredScreen, lp, cp int) {
+	screenPoint := rcaster.PixelScreen.PixelToCamera(cp, lp, 1.0, 0.5, 0.5)
 	line := entity.ExtractLine(rcaster.Cam.Pos, screenPoint)
 	color := make([]int, 3)
 
@@ -78,9 +78,9 @@ func (rcaster *RayCaster) TraceRay(coloredScreen *screen.ColoredScreen, i, j int
 		if closestObjIdx != -1 {
 			color = rcaster.Objs.ObjList[closestObjIdx].Color
 		}
-		coloredScreen.Colors[i][j] = color
+		coloredScreen.Colors[lp][cp] = color
 	} else {
-		coloredScreen.Colors[i][j] = []int{255, 255, 255}
+		coloredScreen.Colors[lp][cp] = []int{255, 255, 255}
 	}
 
 }
@@ -95,8 +95,8 @@ func (rcaster *RayCaster) TraceRay(coloredScreen *screen.ColoredScreen, i, j int
 //
 func (rcaster *RayCaster) Run() *screen.ColoredScreen {
 	coloredScreen := screen.InitColoredScreen(rcaster.PixelScreen.Width, rcaster.PixelScreen.Height)
-	for i := 0; i < rcaster.PixelScreen.Width; i++ {
-		for j := 0; j < rcaster.PixelScreen.Height; j++ {
+	for i := 0; i < rcaster.PixelScreen.Height; i++ {
+		for j := 0; j < rcaster.PixelScreen.Width; j++ {
 			rcaster.TraceRay(&coloredScreen, i, j)
 		}
 	}

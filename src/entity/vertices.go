@@ -42,7 +42,7 @@ func VerticesToHomogeneousCoord(vertices *Vertices) utils.Matrix {
 //  the corresponding Vertices.
 //
 func MatrixToVertices(matrix *utils.Matrix) Vertices {
-	points := make([]Point, len(matrix.Values)-1) //ignoring last value
+	points := make([]Point, len(matrix.Values[0]))
 	for j := 0; j < len(matrix.Values[0]); j++ {
 		pointAux := InitPoint(len(matrix.Values) - 1)
 		for i := 0; i < len(matrix.Values)-1; i++ {

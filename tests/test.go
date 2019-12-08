@@ -75,12 +75,12 @@ func main() {
 
 	fmt.Println("point:\n", objects.ObjList[0].Vertices.Points[0])
 
-	lightPath := "resources/json/light.json"
-	lights := light.LoadJSONLights(lightPath)
-
 	screen := screen.InitScreen(200, 200)
 	screen.CamToWorld = &camMatrix
-	fmt.Println("point:\n", screen.PixelToCamera(100, 100, 1, 0.5, 0.5))
+	fmt.Println("point:\n", screen.PixelToWorld(99, 99, 1, 0.5, 0.5))
+
+	lightPath := "resources/json/light.json"
+	lights := light.LoadJSONLights(lightPath)
 
 	rayCaster := raycasting.InitRayCaster(objects, &screen, cam, lights)
 

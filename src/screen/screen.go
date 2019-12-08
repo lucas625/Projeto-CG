@@ -52,7 +52,7 @@ type Screen struct {
 	CamToWorld *utils.Matrix
 }
 
-// PixelToCamera is a function to get the position of a pixel in camera coordinates.
+// PixelToWorld is a function to get the position of a pixel in world coordinates.
 //
 // Parameters:
 // 	x        - position of the pixel.
@@ -65,7 +65,7 @@ type Screen struct {
 // Returns:
 // 	a Point.
 //
-func (sc *Screen) PixelToCamera(x, y int, d float64, px, py float64) entity.Point {
+func (sc *Screen) PixelToWorld(x, y int, d float64, px, py float64) entity.Point {
 	if x >= sc.Width || y >= sc.Height {
 		utils.ShowError(errors.New("Invalid Pixel"), "X("+strconv.Itoa(x)+") or Y("+strconv.Itoa(y)+") invalid for screen("+strconv.Itoa(sc.Width)+", "+strconv.Itoa(sc.Height)+").")
 	}
@@ -74,21 +74,16 @@ func (sc *Screen) PixelToCamera(x, y int, d float64, px, py float64) entity.Poin
 	NDCx := (float64(x) + px) / float64(sc.Width)
 	NDCy := (float64(y) + py) / float64(sc.Height)
 
-	screenx := (2 * NDCx) - 1
-	screeny := 1 - (2 * NDCy)
-
 	aspectRatio := float64(sc.Width) / float64(sc.Height)
 	alpha := float64(90) // field of view
-	z := 0.0
+	z := 1.0
 	if d > 0 {
 		alpha = math.Atan(1/d) * 2
-		z = z + d
-	} else {
-		z = z + 1
+		z = d
 	}
 
-	camerax := ((2 * screenx) - 1) * aspectRatio * math.Tan(alpha/2)
-	cameray := 1 - (2*screeny)*math.Tan(alpha/2)
+	camerax := NDCx * aspectRatio * math.Tan(alpha/2)
+	cameray := NDCy * math.Tan(alpha/2)
 	p := entity.InitPoint(3)
 	p.Coordinates[0] = camerax
 	p.Coordinates[1] = cameray

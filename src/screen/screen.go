@@ -2,7 +2,6 @@ package screen
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"strconv"
 
@@ -77,7 +76,6 @@ func (sc *Screen) PixelToCamera(x, y int, d float64, px, py float64) entity.Poin
 
 	screenx := (2 * NDCx) - 1
 	screeny := 1 - (2 * NDCy)
-	fmt.Println(screenx, screeny)
 
 	aspectRatio := float64(sc.Width) / float64(sc.Height)
 	alpha := float64(90) // field of view

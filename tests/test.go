@@ -9,11 +9,13 @@ import (
 
 	"github.com/lucas625/Projeto-CG/src/utils"
 
+	"github.com/lucas625/Projeto-CG/src/algorithms/raycasting"
 	"github.com/lucas625/Projeto-CG/src/camera"
-	"github.com/lucas625/Projeto-CG/src/entity"
 	"github.com/lucas625/Projeto-CG/src/general"
 	"github.com/lucas625/Projeto-CG/src/io/obj"
+	"github.com/lucas625/Projeto-CG/src/light"
 	"github.com/lucas625/Projeto-CG/src/screen"
+	"github.com/lucas625/Projeto-CG/src/visualizer"
 )
 
 func main() {
@@ -72,25 +74,17 @@ func main() {
 	fmt.Println("cam:\n", cam)
 
 	fmt.Println("point:\n", objects.ObjList[0].Vertices.Points[0])
-	p := entity.InitPoint(3)
-	pHom := entity.PointToHomogeneousCoord(&objects.ObjList[0].Vertices.Points[0])
 
-	pMatPos := utils.MultMatrix(&camMatrix, &pHom)
-	for i := 0; i < 3; i++ {
-		p.Coordinates[i] = pMatPos.Values[i][0]
-	}
-	fmt.Println("point2:\n", p)
-
-	// lightPath := "resources/json/light.json"
-	// lights := light.LoadJSONLights(lightPath)
+	lightPath := "resources/json/light.json"
+	lights := light.LoadJSONLights(lightPath)
 
 	screen := screen.InitScreen(200, 200)
 	screen.CamToWorld = &camMatrix
 	fmt.Println("point:\n", screen.PixelToCamera(100, 100, 1, 0.5, 0.5))
 
-	// rayCaster := raycasting.InitRayCaster(objects, &screen, cam, lights)
+	rayCaster := raycasting.InitRayCaster(objects, &screen, cam, lights)
 
-	// colorScreen := rayCaster.Run()
+	colorScreen := rayCaster.Run()
 
-	// visualizer.WritePPM(*colorScreen, outPath)
+	visualizer.WritePPM(*colorScreen, outPath)
 }

@@ -63,9 +63,9 @@ func (line Line) FindPos(t float64) Point {
 func (line Line) IntersectPlane(plane Plane) (float64, bool, bool) {
 	tMult := (line.Director.Coordinates[0] * plane.A) + (line.Director.Coordinates[1] * plane.B) + (line.Director.Coordinates[2] * plane.C)
 	cVal := (line.Start.Coordinates[0] * plane.A) + (line.Start.Coordinates[1] * plane.B) + (line.Start.Coordinates[2] * plane.C) + plane.D
-	if tMult == 0 && cVal == 0 {
+	if utils.CheckTolerance(tMult, 0) && utils.CheckTolerance(cVal, 0) {
 		return 0, true, true
-	} else if tMult == 0 && cVal != 0 {
+	} else if utils.CheckTolerance(tMult, 0) && !utils.CheckTolerance(cVal, 0) {
 		return 0, false, false
 	}
 	t := (-1 * cVal) / tMult
@@ -135,7 +135,7 @@ func FindBaricentricCoordinates(triang []Point, pos Point) []float64 {
 
 	alpha := AreaA / AreaABC
 	beta := AreaB / AreaABC
-	gama := 1 - alpha - beta
+	gama := (1 - alpha) - beta
 
 	coordinates := []float64{alpha, beta, gama}
 	return coordinates

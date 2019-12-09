@@ -38,3 +38,17 @@ func PathExists(path string) bool {
 	}
 	return true
 }
+
+// CheckTolerance is a function to check the tolerance.
+//
+// Parameters:
+// 	value - the target value.
+//  pos   - the value it must be compared with.
+//
+// Returns:
+// 	a flag if within the tolerance.
+//
+func CheckTolerance(value, pos float64) bool {
+	tol := 10E-10
+	return (pos-tol <= value && value <= pos+tol)
+}

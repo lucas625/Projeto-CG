@@ -5,7 +5,6 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/lucas625/Projeto-CG/src/entity"
 	"github.com/lucas625/Projeto-CG/src/utils"
 )
 
@@ -63,9 +62,9 @@ type Screen struct {
 //  py       - the additional on y (0->1)
 //
 // Returns:
-// 	a Point.
+// 	a Vector.
 //
-func (sc *Screen) PixelToWorld(x, y int, d float64, px, py float64) entity.Point {
+func (sc *Screen) PixelToWorld(x, y int, d float64, px, py float64) utils.Vector {
 	if x >= sc.Width || y >= sc.Height {
 		utils.ShowError(errors.New("Invalid Pixel"), "X("+strconv.Itoa(x)+") or Y("+strconv.Itoa(y)+") invalid for screen("+strconv.Itoa(sc.Width)+", "+strconv.Itoa(sc.Height)+").")
 	}
@@ -84,19 +83,21 @@ func (sc *Screen) PixelToWorld(x, y int, d float64, px, py float64) entity.Point
 
 	camerax := NDCx * aspectRatio * math.Tan(alpha/2)
 	cameray := NDCy * math.Tan(alpha/2)
-	p := entity.InitPoint(3)
-	p.Coordinates[0] = camerax
-	p.Coordinates[1] = cameray
-	p.Coordinates[2] = z
 
-	pHom := entity.PointToHomogeneousCoord(&p)
+	v := utils.InitVector(3)
 
-	pMatPos := utils.MultMatrix(camWorld, &pHom)
+	v.Coordinates[0] = camerax
+	v.Coordinates[1] = cameray
+	v.Coordinates[2] = z
+
+	vMat := utils.VectorToHomogeneousCoord(&v)
+
+	vMatPos := utils.MultMatrix(camWorld, &vMat)
 	for i := 0; i < 3; i++ {
-		p.Coordinates[i] = pMatPos.Values[i][0]
+		v.Coordinates[i] = vMatPos.Values[i][0]
 	}
-
-	return p
+	//vNormalized := utils.NormalizeVector(&v)
+	return v
 }
 
 // InitScreen is a function to initialize a screen.

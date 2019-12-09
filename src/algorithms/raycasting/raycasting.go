@@ -36,8 +36,8 @@ type RayCaster struct {
 // 	the colored screen painted at that position.
 //
 func (rcaster *RayCaster) TraceRay(coloredScreen *screen.ColoredScreen, lp, cp int) {
-	screenPoint := rcaster.PixelScreen.PixelToWorld(cp, lp, 1.0, 0.5, 0.5)
-	line := entity.ExtractLine(rcaster.Cam.Pos, screenPoint)
+	screenV := rcaster.PixelScreen.PixelToWorld(cp, lp, 1.0, 0.5, 0.5)
+	line := entity.Line{Start: rcaster.Cam.Pos, Director: screenV}
 	color := make([]int, 3)
 
 	closestT := math.MaxFloat64

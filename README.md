@@ -86,4 +86,6 @@ go run tests/test.go
 
 - Running
   
-Unavailable for now.
+```sh
+go run run/run.go
+```

@@ -8,7 +8,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/lucas625/Projeto-CG/src/entity"
+	"github.com/lucas625/Projeto-CG/src/general"
 	"github.com/lucas625/Projeto-CG/src/utils"
 )
 
@@ -43,8 +43,7 @@ func LoadJSONLights(inPath string) *Lights {
 	for _, lgt := range lightAux.LightList {
 		if len(lgt.AmbientIntensity.Coordinates) != 3 ||
 			len(lgt.AmbientReflection.Coordinates) != 3 ||
-			len(lgt.LightIntensity.Coordinates) != 3 ||
-			len(lgt.LightPosition.Coordinates) != 3 {
+			len(lgt.LightIntensity.Coordinates) != 3 {
 			utils.ShowError(errors.New("invalid length of a light component"), "light components must have length equal to 3.")
 		}
 	}
@@ -105,27 +104,24 @@ type Light struct {
 	AmbientReflection utils.Vector
 	LightIntensity    utils.Vector
 	SpecularDecay     float64
-	LightPosition     entity.Point
-	Radius            float64
+	LightObject       general.Object
 }
 
 // InitLight is a function to initialize a Light.
 //
 // Parameters:
-// 	lightPos      - the position of the light.
 // 	specularDecay - how fast the specular component decays.
-//  radius        - the radius of the light.
+//  object        - the object tha defines the light.
 //
 // Returns:
 // 	A Light.
 //
-func InitLight(lightPos entity.Point, specularDecay, radius float64) Light {
+func InitLight(specularDecay float64, object general.Object) Light {
 	lgt := Light{
 		AmbientIntensity:  utils.InitVector(3),
 		AmbientReflection: utils.InitVector(3),
 		LightIntensity:    utils.InitVector(3),
 		SpecularDecay:     specularDecay,
-		Radius:            radius,
-		LightPosition:     lightPos}
+		LightObject:       object}
 	return lgt
 }

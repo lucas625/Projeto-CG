@@ -60,19 +60,23 @@ type Screen struct {
 //  camWorld - the matrix camera to world.
 //  px       - the additional on x (0->1)
 //  py       - the additional on y (0->1)
+//  fov      - field of view in degrees.
 //
 // Returns:
 // 	a Vector.
 //
-func (sc *Screen) PixelToWorld(x, y int, d float64, px, py float64) utils.Vector {
+func (sc *Screen) PixelToWorld(x, y int, d float64, px, py, fov float64) utils.Vector {
 	if x >= sc.Height || y >= sc.Width {
 		utils.ShowError(errors.New("Invalid Pixel"), "X("+strconv.Itoa(x)+") or Y("+strconv.Itoa(y)+") invalid for screen("+strconv.Itoa(sc.Height)+", "+strconv.Itoa(sc.Width)+").")
 	}
 	camWorld := sc.CamToWorld
 
 	aspectRatio := float64(sc.Width) / float64(sc.Height)
-	alpha := (50/2) * math.Pi/180.0
+	alpha := (fov / 2) * math.Pi / 180.0
 	z := 1.0
+	if d >= 0 {
+		z = d
+	}
 
 	camerax := (2*(float64(x)+px)/float64(sc.Width) - 1) * aspectRatio * math.Tan(alpha)
 	cameray := (1 - 2*(float64(y)+py)/float64(sc.Height)) * math.Tan(alpha)

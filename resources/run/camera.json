@@ -1,0 +1,30 @@
+{
+	"Pos": {
+		"Coordinates": [
+			0,
+			1,
+			3.2
+		]
+	},
+	"Look": {
+		"Coordinates": [
+			0,
+			1,
+			-1
+		]
+	},
+	"Up": {
+		"Coordinates": [
+			0,
+			1,
+			0
+		]
+	},
+	"Right": {
+		"Coordinates": [
+			1,
+			0,
+			0
+		]
+	}
+}

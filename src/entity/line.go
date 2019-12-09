@@ -159,7 +159,7 @@ func (line Line) IntersectTriangle(triang []Point) (float64, []float64, bool) {
 	plane := ExtractPlane(triang[0], triang[1], triang[2])
 	t, intersectPlane, planeContains := line.IntersectPlane(plane)
 
-	if !(planeContains || !intersectPlane) {
+	if !planeContains && intersectPlane {
 		pos := line.FindPos(t)
 		Bcoords := FindBaricentricCoordinates(triang, pos)
 		outside := false

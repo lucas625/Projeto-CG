@@ -70,21 +70,15 @@ func main() {
 	// cam = objects.ObjList[0].FindCamera(&cam.Pos)
 
 	camMatrix := camera.CamToWorld(cam)
-	fmt.Println("camMatrix:\n", camMatrix)
-	fmt.Println("cam:\n", cam)
 
-	fmt.Println("point:\n", objects.ObjList[0].Vertices.Points[0])
-
-	screen := screen.InitScreen(200, 200)
-	screen.CamToWorld = &camMatrix
-	fmt.Println("point:\n", screen.PixelToWorld(99, 99, 1, 0.5, 0.5))
+	sc := screen.InitScreen(200, 200)
+	sc.CamToWorld = &camMatrix
 
 	lightPath := "resources/json/light.json"
 	lights := light.LoadJSONLights(lightPath)
 
-	rayCaster := raycasting.InitRayCaster(objects, &screen, cam, lights)
+	rayCaster := raycasting.InitRayCaster(objects, &sc, cam, lights)
 
 	colorScreen := rayCaster.Run()
-
 	visualizer.WritePPM(*colorScreen, outPath)
 }

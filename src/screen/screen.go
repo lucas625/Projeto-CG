@@ -65,24 +65,21 @@ type Screen struct {
 // 	a Vector.
 //
 func (sc *Screen) PixelToWorld(x, y int, d float64, px, py float64) utils.Vector {
-	if x >= sc.Width || y >= sc.Height {
-		utils.ShowError(errors.New("Invalid Pixel"), "X("+strconv.Itoa(x)+") or Y("+strconv.Itoa(y)+") invalid for screen("+strconv.Itoa(sc.Width)+", "+strconv.Itoa(sc.Height)+").")
+	if x >= sc.Height || y >= sc.Width {
+		utils.ShowError(errors.New("Invalid Pixel"), "X("+strconv.Itoa(x)+") or Y("+strconv.Itoa(y)+") invalid for screen("+strconv.Itoa(sc.Height)+", "+strconv.Itoa(sc.Width)+").")
 	}
 	camWorld := sc.CamToWorld
 
-	NDCx := (float64(x) + px) / float64(sc.Width)
-	NDCy := (float64(y) + py) / float64(sc.Height)
-
 	aspectRatio := float64(sc.Width) / float64(sc.Height)
-	alpha := float64(90) // field of view
+	alpha := math.Pi / 2
 	z := 1.0
 	if d > 0 {
 		alpha = math.Atan(1/d) * 2
 		z = d
 	}
 
-	camerax := NDCx * aspectRatio * math.Tan(alpha/2)
-	cameray := NDCy * math.Tan(alpha/2)
+	camerax := (2*(float64(x)+px)/float64(sc.Width) - 1) * aspectRatio * math.Tan(alpha/2)
+	cameray := (1 - 2*(float64(y)+py)/float64(sc.Height)) * math.Tan(alpha/2)
 
 	v := utils.InitVector(3)
 
@@ -96,8 +93,9 @@ func (sc *Screen) PixelToWorld(x, y int, d float64, px, py float64) utils.Vector
 	for i := 0; i < 3; i++ {
 		v.Coordinates[i] = vMatPos.Values[i][0]
 	}
-	//vNormalized := utils.NormalizeVector(&v)
-	return v
+	vNormalized := utils.NormalizeVector(&v)
+
+	return vNormalized
 }
 
 // InitScreen is a function to initialize a screen.

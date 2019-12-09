@@ -24,19 +24,31 @@ func WritePPM(sc screen.ColoredScreen, outPath string) {
 	ppmAsString := ""
 	header := "P3\n# object.ppm\n" + strconv.Itoa(sc.Width) + " " + strconv.Itoa(sc.Height) + "\n255\n"
 	body := ""
+	count := 0
 	for i := 0; i < sc.Height; i++ {
+		body = body + " "
 		for j := 0; j < sc.Width; j++ {
 			for k := 0; k < 3; k++ {
 				body = body + strconv.Itoa(sc.Colors[i][j][k])
 				if k+1 < 3 {
 					body = body + "  "
-				} else if j+1 < sc.Width {
+				} else if count < 3 {
 					body = body + "    "
-				} else {
-					body = body + "\n"
+				}
+			}
+			count++
+			if count >= 4 {
+				body = body + "\n"
+				count = 0
+				if j+1 < sc.Width {
+					body = body + " "
 				}
 			}
 		}
+	}
+	if count != 0 {
+		body = body + "\n"
+		count = 0
 	}
 	ppmAsString = header + body
 	Write(outPath, ppmAsString)

@@ -34,6 +34,7 @@ func ExtractPlane(p0, p1, p2 Point) Plane {
 	v2 := ExtractVector(&p0, &p2)
 
 	normV := utils.VectorCrossProduct(&v1, &v2)
+	normV = utils.NormalizeVector(&normV)
 	a := normV.Coordinates[0]
 	b := normV.Coordinates[1]
 	c := normV.Coordinates[2]

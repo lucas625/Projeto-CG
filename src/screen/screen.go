@@ -71,15 +71,11 @@ func (sc *Screen) PixelToWorld(x, y int, d float64, px, py float64) utils.Vector
 	camWorld := sc.CamToWorld
 
 	aspectRatio := float64(sc.Width) / float64(sc.Height)
-	alpha := math.Pi / 2
+	alpha := (50/2) * math.Pi/180.0
 	z := 1.0
-	if d > 0 {
-		alpha = math.Atan(1/d) * 2
-		z = d
-	}
 
-	camerax := (2*(float64(x)+px)/float64(sc.Width) - 1) * aspectRatio * math.Tan(alpha/2)
-	cameray := (1 - 2*(float64(y)+py)/float64(sc.Height)) * math.Tan(alpha/2)
+	camerax := (2*(float64(x)+px)/float64(sc.Width) - 1) * aspectRatio * math.Tan(alpha)
+	cameray := (1 - 2*(float64(y)+py)/float64(sc.Height)) * math.Tan(alpha)
 
 	v := utils.InitVector(3)
 

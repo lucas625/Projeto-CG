@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"errors"
 	"math"
 
 	"github.com/lucas625/Projeto-CG/src/utils"
@@ -153,29 +152,47 @@ func FindBaricentricCoordinates(triang []Point, pos Point) []float64 {
 //  A flag checking if has intersection.
 //
 func (line Line) IntersectTriangle(triang []Point) (float64, []float64, bool) {
-	if len(triang) != 3 {
-		utils.ShowError(errors.New("Invalid Intersection"), "Triangle with number of vertices different than 3")
+	rayOrigin := line.Start
+	rayVector := line.Director
+
+	EPSILON := 0.0000001;
+
+	vertex0 := triang[0]
+	vertex1 := triang[1]
+	vertex2 := triang[2]
+
+
+	bCoord := make([]float64, 3)
+
+
+	edge1 := ExtractVector(&vertex0, &vertex1)
+	edge2 := ExtractVector(&vertex0, &vertex2)
+
+    h := utils.VectorCrossProduct(&rayVector, &edge2)
+	a := utils.DotProduct(&edge1, &h);
+	
+    if a > -EPSILON && a < EPSILON {
+		return 0,bCoord, false;    // This ray is parallel to this triangle.
 	}
-	plane := ExtractPlane(triang[0], triang[1], triang[2])
-	t, intersectPlane, planeContains := line.IntersectPlane(plane)
-
-	if !planeContains && intersectPlane {
-		pos := line.FindPos(t)
-		Bcoords := FindBaricentricCoordinates(triang, pos)
-		outside := false
-		for _, coord := range Bcoords {
-			if coord > 1 || coord < 0 {
-				outside = true
-			}
-		}
-
-		if outside {
-			return 0, []float64{0, 0, 0}, false
-		}
-
-		return t, Bcoords, true
-
+	f := 1.0/a
+	
+    s := ExtractVector(&vertex0,&rayOrigin)
+    u := f * utils.DotProduct(&s, &h)
+    if u < 0.0 || u > 1.0 {
+		return 0,bCoord,false
 	}
-
-	return 0, []float64{0, 0, 0}, false
+    q := utils.VectorCrossProduct(&s,&edge1);
+    v := f * utils.DotProduct(&rayVector,&q);
+    if v < 0.0 || u + v > 1.0 {
+		return 0,bCoord,false
+	}
+    // At this stage we can compute t to find out where the intersection point is on the line.
+    t := f * utils.DotProduct(&edge2, &q)
+    if t > EPSILON && t < 1/EPSILON {
+		// outIntersectionPoint = rayOrigin + rayVector * t
+		bCoord = []float64{1-u-v, u, v}
+        return t,bCoord,true
+    }
+    
+	return 0,bCoord,false
 }

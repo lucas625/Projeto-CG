@@ -187,8 +187,12 @@ func ReadObj(objPath string) *general.Object {
 	name := getName(objPath)
 
 	color := make([]int, 3)
-
-	object := general.InitObject(name, vertices, triangles, normals, color)
+	specularDecay := 100.0
+	ambientReflection := 0.0
+	diffuseReflection := 0.0
+	specularReflection := 0.0
+	transReflection := 0.0
+	object := general.InitObject(name, vertices, triangles, normals, color, specularDecay, ambientReflection, diffuseReflection, specularReflection, transReflection)
 
 	err = scanner.Err()
 	utils.ShowError(err, "Error on reading file: "+absPath+".")

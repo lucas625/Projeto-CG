@@ -89,18 +89,28 @@ func InitObjects(label string, objlist []Object) *Objects {
 // Object is a class for all data of an object.
 //
 // Members:
-//  Name      - the name of the object.
-// 	Vertices  - pointer to a Vertices object.
-// 	Triangles - pointer to a list with all Triangles of the object.
-//  Normals   - pointer to a list of Vectors with all vertices normals.
-//  Color     - RGB for the color of the object.
+//  Name               - the name of the object.
+// 	Vertices           - pointer to a Vertices object.
+// 	Triangles          - pointer to a list with all Triangles of the object.
+//  Normals            - pointer to a list of Vectors with all vertices normals.
+//  Color              - RGB for the color of the object.
+//  SpecularDecay      - constant for how fast the specular component decays.
+//  SpecularReflection - the coeficient of specular reflection.
+//  TransReflection    - the coeficient for transmission.
+//  AmbientReflection  - RGB for the ambient reflection.
+//  DiffuseReflection  - Diffuse reflection coeficient.
 //
 type Object struct {
-	Name      string
-	Vertices  entity.Vertices
-	Triangles []entity.Triangle
-	Normals   []utils.Vector
-	Color     []int
+	Name               string
+	Vertices           entity.Vertices
+	Triangles          []entity.Triangle
+	Normals            []utils.Vector
+	Color              []int
+	SpecularDecay      float64
+	SpecularReflection float64
+	TransReflection    float64
+	AmbientReflection  float64
+	DiffuseReflection  float64
 }
 
 // CheckIntegrity is a function to check the attributes of an object.
@@ -133,7 +143,6 @@ func (obj *Object) CheckIntegrity() {
 	if len(obj.Color) != 3 {
 		utils.ShowError(errors.New("Invalid object"), "Color length not equal 3.")
 	}
-
 }
 
 // NormalizeNormals is a function to normalize all triangle normals.
@@ -202,16 +211,20 @@ func (obj *Object) FindCamera(ptCamera *entity.Point) *camera.Camera {
 // InitObject is a function to initialize an Object.
 //
 // Parameters:
-//  name      - the name of the object.
-// 	vertices  - Vertices object with all points.
-//  triangles - list of triangles.
-//  normals   - list of normal vectors.
-//  color     - the color of the object.
+//  name               - the name of the object.
+// 	vertices           - Vertices object with all points.
+//  triangles          - list of triangles.
+//  normals            - list of normal vectors.
+//  color              - the color of the object.
+//  specularDecay      - constant for how fast the specular component decays.
+//  specularReflection - the coeficient of specular reflection.
+//  TransReflection    - the coeficient for transmission.
 //
 // Returns:
 //  the object.
 //
-func InitObject(name string, vertices entity.Vertices, triangles []entity.Triangle, normals []utils.Vector, color []int) Object {
-	obj := Object{Name: name, Vertices: vertices, Triangles: triangles, Normals: normals, Color: color}
+func InitObject(name string, vertices entity.Vertices, triangles []entity.Triangle, normals []utils.Vector, color []int, specularDecay, ambientReflection, diffuseReflection, specularReflection, transReflection float64) Object {
+	obj := Object{Name: name, Vertices: vertices, Triangles: triangles, Normals: normals, Color: color, SpecularDecay: specularDecay, AmbientReflection: ambientReflection, DiffuseReflection: diffuseReflection, SpecularReflection: specularReflection, TransReflection: transReflection}
+	obj.CheckIntegrity()
 	return obj
 }

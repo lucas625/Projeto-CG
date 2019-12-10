@@ -41,9 +41,8 @@ func LoadJSONLights(inPath string) *Lights {
 	utils.ShowError(err, "Failed to unmarshal light.")
 	// Validating the camera
 	for _, lgt := range lightAux.LightList {
-		if len(lgt.AmbientIntensity.Coordinates) != 3 ||
-			len(lgt.AmbientReflection.Coordinates) != 3 ||
-			len(lgt.LightIntensity.Coordinates) != 3 {
+		if len(lgt.AmbientIntensity) != 3 ||
+			len(lgt.LightIntensity) != 3 {
 			utils.ShowError(errors.New("invalid length of a light component"), "light components must have length equal to 3.")
 		}
 	}
@@ -93,35 +92,30 @@ func InitLights(lightList []Light) Lights {
 //
 // Members:
 //  AmbientIntensity   - RGB for the ambient intensity.
-//  AmbientReflection  - RGB for the ambient reflection.
 //  LightIntensity     - RGB for the light intensity.
-//  SpecularDecay      - constant for how fast the specular component decays.
-//  LightPosition      - 3D position of the light.
-//  Radius             - radius of the light.
+//  LightObject        - Object for the light.
 //
 type Light struct {
-	AmbientIntensity  utils.Vector
-	AmbientReflection utils.Vector
-	LightIntensity    utils.Vector
-	SpecularDecay     float64
-	LightObject       general.Object
+	AmbientIntensity []int
+	LightIntensity   []int
+	LightObject      general.Object
 }
 
 // InitLight is a function to initialize a Light.
 //
 // Parameters:
-// 	specularDecay - how fast the specular component decays.
-//  object        - the object tha defines the light.
+//  ambientIntensity  - the rgb ambient intensity of the light.
+//  lightIntensity    - the rgb instensity of the light.
+//  object            - the object tha defines the light.
 //
 // Returns:
 // 	A Light.
 //
-func InitLight(specularDecay float64, object general.Object) Light {
+func InitLight(ambientIntensity, lightIntensity []int, object general.Object) Light {
 	lgt := Light{
-		AmbientIntensity:  utils.InitVector(3),
-		AmbientReflection: utils.InitVector(3),
-		LightIntensity:    utils.InitVector(3),
-		SpecularDecay:     specularDecay,
-		LightObject:       object}
+		AmbientIntensity: ambientIntensity,
+		LightIntensity:   lightIntensity,
+		LightObject:      object,
+	}
 	return lgt
 }

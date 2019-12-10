@@ -41,8 +41,7 @@ func LoadJSONLights(inPath string) *Lights {
 	utils.ShowError(err, "Failed to unmarshal light.")
 	// Validating the camera
 	for _, lgt := range lightAux.LightList {
-		if len(lgt.AmbientIntensity) != 3 ||
-			len(lgt.LightIntensity) != 3 {
+		if len(lgt.Color) != 3 {
 			utils.ShowError(errors.New("invalid length of a light component"), "light components must have length equal to 3.")
 		}
 	}
@@ -91,27 +90,30 @@ func InitLights(lightList []Light) Lights {
 // Light is a structure for holding a light data.
 //
 // Members:
-//  AmbientIntensity   - RGB for the ambient intensity.
-//  LightIntensity     - RGB for the light intensity.
+//  AmbientIntensity   - the ambient intensity.
+//  LightIntensity     - the light intensity.
 //  LightObject        - Object for the light.
+//  Color              - RGB of the light.
 //
 type Light struct {
-	AmbientIntensity []int
-	LightIntensity   []int
+	AmbientIntensity float64
+	LightIntensity   float64
+	Color            []int
 	LightObject      general.Object
 }
 
 // InitLight is a function to initialize a Light.
 //
 // Parameters:
-//  ambientIntensity  - the rgb ambient intensity of the light.
-//  lightIntensity    - the rgb instensity of the light.
+//  ambientIntensity  - the ambient intensity of the light.
+//  lightIntensity    - the instensity of the light.
 //  object            - the object tha defines the light.
+//  color             - the rgb of the light.
 //
 // Returns:
 // 	A Light.
 //
-func InitLight(ambientIntensity, lightIntensity []int, object general.Object) Light {
+func InitLight(ambientIntensity, lightIntensity float64, object general.Object, color []int) Light {
 	lgt := Light{
 		AmbientIntensity: ambientIntensity,
 		LightIntensity:   lightIntensity,

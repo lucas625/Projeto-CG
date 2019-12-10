@@ -69,6 +69,7 @@ func LoadJSONObjects(inPath string) *Objects {
 	utils.ShowError(err, "Failed to unmarshal objects.")
 	for _, obj := range objsAux.ObjList {
 		obj.CheckIntegrity()
+		obj.NormalizeNormals()
 	}
 	return &objsAux
 }
@@ -143,6 +144,28 @@ func (obj *Object) CheckIntegrity() {
 	if len(obj.Color) != 3 {
 		utils.ShowError(errors.New("Invalid object"), "Color length not equal 3.")
 	}
+}
+
+// GetNormalByBaricentricCoords is a function to calculate a vertice normal using baricientric coordinates.
+//
+// Parameters:
+// 	triangleIdx       - the index of the triangle.
+//  baricentricCoords - tha baricentric coords for the normal.
+//
+// Returns:
+//  the normal.
+//
+func (obj *Object) GetNormalByBaricentricCoords(triangleIdx int, baricentricCoords []float64) utils.Vector {
+	normals := make([]utils.Vector, 3)
+	for i := 0; i < 3; i++ {
+		normals[i] = utils.CMultVector(&obj.Normals[obj.Triangles[triangleIdx].Normals[i]], baricentricCoords[i])
+	}
+	resultingNormal := utils.InitVector(3)
+	for i := 0; i < 3; i++ {
+		resultingNormal = utils.SumVector(&resultingNormal, &normals[i], 1, 1)
+	}
+	resultingNormal = utils.NormalizeVector(&resultingNormal)
+	return resultingNormal
 }
 
 // NormalizeNormals is a function to normalize all triangle normals.

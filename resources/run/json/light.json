@@ -1,12 +1,9 @@
 {
 	"LightList": [
 		{
-			"AmbientIntensity": [
-				0,
-				0,
-				0
-			],
-			"LightIntensity": [
+			"AmbientIntensity": 0.5,
+			"LightIntensity": 1.0,
+			"Color": [
 				255,
 				255,
 				255

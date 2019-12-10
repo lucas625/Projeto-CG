@@ -4,6 +4,7 @@ import (
 	"github.com/lucas625/Projeto-CG/src/camera"
 	"github.com/lucas625/Projeto-CG/src/general"
 	"github.com/lucas625/Projeto-CG/src/light"
+	"github.com/lucas625/Projeto-CG/src/screen"
 )
 
 func main() {
@@ -17,9 +18,9 @@ func main() {
 	outPath := "out/pathtracing"
 
 	// getting screen
-	// camMatrix := camera.CamToWorld(&cam)
-	// sc := screen.InitScreen(200, 200)
-	// sc.CamToWorld = &camMatrix
+	camMatrix := camera.CamToWorld(cam)
+	sc := screen.InitScreen(200, 200)
+	sc.CamToWorld = &camMatrix
 
 	// rayCaster := raycasting.InitRayCaster(objects, &sc, &cam, &lights)
 

@@ -30,28 +30,45 @@ type PathTracer struct {
 // CalculateColor is a function to calculate the color at a point.
 //
 // Parameters:
-//
+//	objIdx      - the index of the object.
+//  triangleIdx - the index of the triangle.
+//  bcoords     - the baricentric coordinates of the point.
+//  pos         - the point.
+//  isShadow    - a flag telling if is a shadow for each light.
 //
 // Returns:
 // 	the color at a given point.
 //
-func (ptracer *PathTracer) CalculateColor(objIdx, triangleIdx int, bcoords []float64, pos entity.Point) []int {
+func (ptracer *PathTracer) CalculateColor(objIdx, triangleIdx int, bcoords []float64, pos entity.Point, isShadow []bool) []int {
 	resultColor := make([]int, 3)
 	obj := ptracer.Objs.ObjList[objIdx]
+
 	Nvector := obj.GetNormalByBaricentricCoords(triangleIdx, bcoords)
-	Lvector := utils.InitVector(3) // FIXME: find the real L vector.
-	raux := utils.CMultVector(&Nvector, utils.DotProduct(&Nvector, &Lvector)*2)
-	Rvector := utils.SumVector(&raux, &Lvector, 1, -1)
+	Nvector = utils.NormalizeVector(&Nvector)
+
 	Vvector := entity.ExtractVector(&pos, &ptracer.Cam.Pos)
-	for _, lgt := range ptracer.Lgts.LightList {
-		ambientColor := make([]float64, 3)
-		diffuseColor := make([]float64, 3)
-		specularColor := make([]float64, 3)
-		for i := 0; i < 3; i++ {
-			ambientColor[i] = lgt.AmbientIntensity * obj.AmbientReflection * float64(obj.Color[i])
-			diffuseColor[i] = lgt.LightIntensity * obj.DiffuseReflection * float64(obj.Color[i])
-			specularColor[i] = lgt.LightIntensity * obj.SpecularReflection * math.Pow(utils.DotProduct(&Rvector, &Vvector), obj.SpecularDecay) * float64(lgt.Color[i])
-			resultColor[i] = resultColor[i] + int(math.Floor(ambientColor[i]+diffuseColor[i]+specularColor[i]))
+	Vvector = utils.NormalizeVector(&Vvector)
+
+	for lidx, lgt := range ptracer.Lgts.LightList {
+		if !isShadow[lidx] { // only calculates the color if isn't a shadow point
+			ambientColor := make([]float64, 3)
+			diffuseColor := make([]float64, 3)
+			specularColor := make([]float64, 3)
+
+			lightPos := lgt.LightObject.GetCenter()
+			Lvector := entity.ExtractVector(&pos, &lightPos)
+			Lvector = utils.NormalizeVector(&Lvector)
+
+			raux := utils.CMultVector(&Nvector, utils.DotProduct(&Nvector, &Lvector)*2)
+			Rvector := utils.SumVector(&raux, &Lvector, 1, -1)
+			Rvector = utils.NormalizeVector(&Rvector)
+
+			for i := 0; i < 3; i++ {
+				ambientColor[i] = lgt.AmbientIntensity * obj.AmbientReflection * float64(obj.Color[i])
+				diffuseColor[i] = lgt.LightIntensity * obj.DiffuseReflection * float64(obj.Color[i])
+				specularColor[i] = lgt.LightIntensity * obj.SpecularReflection * math.Pow(utils.DotProduct(&Rvector, &Vvector), obj.SpecularDecay) * float64(lgt.Color[i])
+				resultColor[i] = resultColor[i] + int(math.Floor(ambientColor[i]+diffuseColor[i]+specularColor[i]))
+			}
 		}
 	}
 	for i := 0; i < 3; i++ {
@@ -62,6 +79,42 @@ func (ptracer *PathTracer) CalculateColor(objIdx, triangleIdx int, bcoords []flo
 		}
 	}
 	return resultColor
+}
+
+// IntersectLight is a function to find the intersection with the light.
+//
+// Parameters:
+//	line     - the ray.
+//  lgtIndex - the index of the light.
+//
+// Returns:
+// 	t         - the line parameter.
+//  intersect - a flag telling if intersected the light.
+//
+func (ptracer *PathTracer) IntersectLight(line entity.Line, lgtIndex int) (float64, bool) {
+	t := 0.0
+	intersect := false
+	// FIXME: implement light intersection logic.
+	return t, intersect
+}
+
+// IsShadow is a function to determine if a point is a shadow.
+//
+// Parameters:
+//	pos - the point.
+//
+// Returns:
+// 	the flag telling if is a shadow for every light.
+//
+func (ptracer *PathTracer) IsShadow(pos entity.Point) []bool {
+	isShadow := make([]bool, len(ptracer.Lgts.LightList))
+	for i, lgt := range ptracer.Lgts.LightList {
+		lightPos := lgt.LightObject.GetCenter()
+		line := entity.ExtractLine(pos, lightPos)
+		line.Director = utils.NormalizeVector(&line.Director)
+		_, isShadow[i] = ptracer.IntersectLight(line, i)
+	}
+	return isShadow
 }
 
 // TraceRay is a function to trace a ray through a pixel.

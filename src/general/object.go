@@ -184,6 +184,23 @@ func (obj *Object) NormalizeNormals() {
 	}
 }
 
+// GetCenter is a function to get the center of the bounding box of the object.
+//
+// Parameters:
+// 	none
+//
+// Returns:
+//  the pos.
+//
+func (obj *Object) GetCenter() entity.Point {
+	objectBB := obj.GetBoundingBox()
+	pos := entity.InitPoint(3)
+	for j := 0; j < 3; j++ {
+		pos.Coordinates[j] = (objectBB[j] + objectBB[j+3]) / 2
+	}
+	return pos
+}
+
 // GetBoundingBox is a function to get the bounding box of an Object.
 //
 // Parameters:

@@ -76,7 +76,7 @@ func readPoint(line string) *[]byte {
 	for i, c := range inp {
 		var err error
 		pt.Coordinates[i], err = strconv.ParseFloat(c, 64)
-		utils.ShowError(err, "Unable to convert coordinate to float.")
+		utils.ShowError(err, "Unable to convert coordinate to float Obj.")
 	}
 	ptAsBytes, err := json.Marshal(pt)
 	utils.ShowError(err, "Unable to marshal point.")
@@ -97,6 +97,8 @@ func readLine(line string) (int, *[]byte) {
 	case 'v':
 		if line[1] == 'n' {
 			return 2, readNormal(line)
+		} else if line[1] == 't' {
+			return 3, nil
 		}
 		return 0, readPoint(line) // vertex case
 	case 'f':

@@ -8,7 +8,7 @@ import (
 	"github.com/lucas625/Projeto-CG/src/light"
 	"github.com/lucas625/Projeto-CG/src/screen"
 	// "github.com/lucas625/Projeto-CG/src/visualizer"
-	"github.com/lucas625/Projeto-CG/src/obj"
+	"github.com/lucas625/Projeto-CG/src/io/obj"
 )
 
 func main() {

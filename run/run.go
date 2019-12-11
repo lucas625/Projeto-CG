@@ -19,7 +19,7 @@ func main() {
 	lights := light.LoadJSONLights("resources/run/json/light.json")
 	objects := general.LoadJSONObjects("resources/run/json/objects.json")
 	newObj := obj.ReadObj("resources/run/upperBox.obj")
-	objects.ObjList = append(objects.ObjList, newObj)
+	objects.ObjList = append(objects.ObjList, *newObj)
 	outPath := "out/pathtracing"
 	fmt.Println(cam, lights, objects)
 	objects.WriteJSONObjects(outPath)

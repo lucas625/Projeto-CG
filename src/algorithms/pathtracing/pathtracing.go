@@ -54,12 +54,20 @@ func (ptracer *PathTracer) FindNextRay(pos entity.Point, obj general.Object, tri
 	vector := utils.Vector{Coordinates: []float64{1.0, 1.0, 1.0}}
 	if r <= obj.DiffuseReflection {
 		// FIXME: calculate correct diffuse reflection
+		R1 := rand.Float64()
+		R2 := rand.Float64()
+
+		phi := 1 / math.Cos(math.Sqrt(R1))
+		theta := 2 * math.Pi * R2
+
 		lightPos := ptracer.Lgts.LightList[0].LightObject.GetCenter()
 		Lvector := entity.ExtractVector(&pos, &lightPos)
 		Lvector = utils.NormalizeVector(&Lvector)
 
 		constantPart := 2 * utils.DotProduct(&resultingNormal, &Lvector)
 		vector = utils.SumVector(&resultingNormal, &Lvector, constantPart, -1) // R = 2N(N.L) - L
+		vector.Coordinates[0] = vector.Coordinates[0] * phi
+		vector.Coordinates[1] = vector.Coordinates[1] * theta
 	} else if r <= obj.DiffuseReflection+obj.SpecularReflection {
 		lightPos := ptracer.Lgts.LightList[0].LightObject.GetCenter()
 		Lvector := entity.ExtractVector(&pos, &lightPos)
@@ -163,7 +171,10 @@ func (ptracer *PathTracer) TraceRay(lp, cp, rays, recursions int) []int {
 	floatColors := make([][]float64, rays)
 	for ray := 0; ray < rays; ray++ {
 
-		screenV := ptracer.PixelScreen.PixelToWorld(lp, cp, 1.0, 0.5, 0.5, ptracer.Cam.FieldOfView)
+		offx := rand.Float64()
+		offy := rand.Float64()
+
+		screenV := ptracer.PixelScreen.PixelToWorld(lp, cp, 1.0, offx, offy, ptracer.Cam.FieldOfView)
 		line := entity.Line{Start: ptracer.Cam.Pos, Director: screenV}
 
 		color := make([]float64, 3)
@@ -180,8 +191,7 @@ func (ptracer *PathTracer) TraceRay(lp, cp, rays, recursions int) []int {
 				}
 				t, bCoords, intersected := line.IntersectTriangle(points)
 				if intersected {
-					pos := line.FindPos(t)
-					if t > 0 && pos.Coordinates[2] >= line.Start.Coordinates[2]+ptracer.Cam.Near && t < closestT {
+					if t >= 1 && t < closestT {
 						closestT = t
 						closestObjIdx = objIdx
 						closestTriangleIndex = triangIdx
@@ -201,8 +211,7 @@ func (ptracer *PathTracer) TraceRay(lp, cp, rays, recursions int) []int {
 				}
 				t, _, intersected := line.IntersectTriangle(points)
 				if intersected {
-					pos := line.FindPos(t)
-					if t > 0 && pos.Coordinates[2] >= line.Start.Coordinates[2]+ptracer.Cam.Near && t <= closestT {
+					if t >= 1 && t <= closestT {
 						lightClosest = true
 						closestT = t
 						closestObjIdx = lgtIdx
@@ -221,8 +230,6 @@ func (ptracer *PathTracer) TraceRay(lp, cp, rays, recursions int) []int {
 				for i := 0; i < 3; i++ {
 					color[i] = ptracer.Objs.ObjList[closestObjIdx].Color[i] * colorAux[i]
 				}
-			} else {
-				fmt.Println("no intersection", lp, cp)
 			}
 		} else {
 			for i := 0; i < 3; i++ {

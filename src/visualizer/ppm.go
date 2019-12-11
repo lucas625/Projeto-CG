@@ -6,6 +6,7 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+	"fmt"
 
 	"github.com/lucas625/Projeto-CG/src/screen"
 	"github.com/lucas625/Projeto-CG/src/utils"
@@ -16,13 +17,15 @@ import (
 // Parameters:
 //  sc      - the colored screen.
 //  outPath - path to the output folder.
+//  name    - the name of the obj.
+//  p       - flag to print (if true will not write).
 //
 // Returns:
 //  none
 //
-func WritePPM(sc screen.ColoredScreen, outPath string) {
+func WritePPM(sc screen.ColoredScreen, outPath, name string, p bool) {
 	ppmAsString := ""
-	header := "P3\n# object.ppm\n" + strconv.Itoa(sc.Width) + " " + strconv.Itoa(sc.Height) + "\n255\n"
+	header := "P3\n# "+name+".ppm\n" + strconv.Itoa(sc.Width) + " " + strconv.Itoa(sc.Height) + "\n255\n"
 	body := ""
 	count := 0
 	for i := 0; i < sc.Height; i++ {
@@ -51,7 +54,12 @@ func WritePPM(sc screen.ColoredScreen, outPath string) {
 		count = 0
 	}
 	ppmAsString = header + body
-	Write(outPath, ppmAsString)
+	if p {
+		fmt.Println(ppmAsString)
+	}else {
+		Write(outPath, ppmAsString)
+	}
+	
 }
 
 // Write is a function to write a ppm with its string.

@@ -27,5 +27,5 @@ func main() {
 	pathTracer := pathtracing.InitPathTracer(objects, &sc, cam, lights)
 
 	colorScreen := pathTracer.Run(raysPerPixel, iterations)
-	visualizer.WritePPM(*colorScreen, outPath)
+	visualizer.WritePPM(*colorScreen, outPath, "again", true)
 }

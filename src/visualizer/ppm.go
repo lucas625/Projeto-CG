@@ -57,7 +57,7 @@ func WritePPM(sc screen.ColoredScreen, outPath, name string, p bool) {
 	if p {
 		fmt.Println(ppmAsString)
 	}else {
-		Write(outPath, ppmAsString)
+		Write(outPath, ppmAsString, name)
 	}
 	
 }
@@ -67,15 +67,16 @@ func WritePPM(sc screen.ColoredScreen, outPath, name string, p bool) {
 // Parameters:
 //  outPath     - path to the output folder.
 //  ppmAsString - the ppm formated as string.
+//  name        - the name of the file.
 //
 // Returns:
 //  none
 //
-func Write(outPath, ppmAsString string) {
+func Write(outPath, ppmAsString, name string) {
 	// creating the json
 	file := []byte(ppmAsString)
 	// getting the right path
-	filePath, err := filepath.Abs(path.Join(outPath, "object.ppm"))
+	filePath, err := filepath.Abs(path.Join(outPath, name+".ppm"))
 	utils.ShowError(err, "Unable to get objects's absolute path.")
 	// creating the folder if it doesn't exists.
 	if !utils.PathExists(filePath) {

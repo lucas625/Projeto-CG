@@ -8,7 +8,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/lucas625/Projeto-CG/src/entity"
+	"github.com/lucas625/Projeto-CG/src/general"
 	"github.com/lucas625/Projeto-CG/src/utils"
 )
 
@@ -41,10 +41,7 @@ func LoadJSONLights(inPath string) *Lights {
 	utils.ShowError(err, "Failed to unmarshal light.")
 	// Validating the camera
 	for _, lgt := range lightAux.LightList {
-		if len(lgt.AmbientIntensity.Coordinates) != 3 ||
-			len(lgt.AmbientReflection.Coordinates) != 3 ||
-			len(lgt.LightIntensity.Coordinates) != 3 ||
-			len(lgt.LightPosition.Coordinates) != 3 {
+		if len(lgt.Color) != 3 {
 			utils.ShowError(errors.New("invalid length of a light component"), "light components must have length equal to 3.")
 		}
 	}
@@ -93,78 +90,34 @@ func InitLights(lightList []Light) Lights {
 // Light is a structure for holding a light data.
 //
 // Members:
-//  AmbientIntensity   - RGB for the ambient intensity.
-//  AmbientReflection  - RGB for the ambient reflection.
-//  LightIntensity     - RGB for the light intensity.
-//  SpecularDecay      - constant for how fast the specular component decays.
-//  LightPosition      - 3D position of the light.
-//  Radius             - radius of the light.
+//  AmbientIntensity   - the ambient intensity.
+//  LightIntensity     - the light intensity.
+//  LightObject        - Object for the light.
+//  Color              - RGB of the light.
 //
 type Light struct {
-	AmbientIntensity  utils.Vector
-	AmbientReflection utils.Vector
-	LightIntensity    utils.Vector
-	SpecularDecay     float64
-	LightPosition     entity.Point
-	Radius            float64
+	AmbientIntensity float64
+	LightIntensity   float64
+	Color            []float64
+	LightObject      general.Object
 }
-
-// Evaluate is a function to evaluate the light at a point.
-//
-// Parameters:
-// 	surfaceNormal - surface normal at the point.
-//  camPos        - position of the camera.
-//  pos           - the point.
-//
-// Returns:
-// 	the RGB value of the point as a vector.
-//
-// func (lgt *Light) Evaluate(surfaceNormal utils.Vector, camPos, pos entity.Point) utils.Vector {
-// 	// pt to cam vector
-// 	ptToCam := entity.ExtractVector(&pos, &camPos)
-// 	ptToCamNormalized := utils.NormalizeVector(&ptToCam)
-// 	// pt to light
-// 	lgtPos := lgt.LightPosition
-// 	ptToLight := entity.ExtractVector(&pos, &lgtPos)
-// 	ptToLightNormalized := utils.NormalizeVector(&ptToLight)
-// 	// R vector
-// 	vectorRAux := utils.CMultVector(&surfaceNormal, 2*utils.DotProduct(&surfaceNormal, &ptToLight))
-// 	vectorR := utils.SumVector(&vectorRAux, &ptToLightNormalized, 1, -1)
-// 	vectorRNormalized := utils.NormalizeVector(&vectorR)
-// 	// calculating light
-// 	ambientalPart := utils.InitVector(3)
-// 	diffusePart := utils.InitVector(3)
-// 	specularPart := utils.InitVector(3)
-// 	// auxiliars
-// 	cosO := utils.DotProduct(&surfaceNormal, &ptToLightNormalized)
-// 	cosAWithDecay := math.Pow(utils.DotProduct(&vectorRNormalized, &ptToCamNormalized), lgt.SpecularDecay)
-// 	for i := 0; i < 3; i++ {
-// 		ambientalPart.Coordinates[i] = lgt.AmbientIntensity.Coordinates[i] * lgt.AmbientReflection.Coordinates[i]
-// 		diffusePart.Coordinates[i] = lgt.LightIntensity.Coordinates[i] * lgt.DiffuseReflection.Coordinates[i] * cosO
-// 		specularPart.Coordinates[i] = lgt.LightIntensity.Coordinates[i] * lgt.SpecularReflection.Coordinates[i] * cosAWithDecay
-// 	}
-// 	lightAD := utils.SumVector(&ambientalPart, &diffusePart, 1, 1)
-// 	resultingLight := utils.SumVector(&lightAD, &specularPart, 1, 1)
-// 	return resultingLight
-// }
 
 // InitLight is a function to initialize a Light.
 //
 // Parameters:
-// 	lightPos      - the position of the light.
-// 	specularDecay - how fast the specular component decays.
-//  radius        - the radius of the light.
+//  ambientIntensity  - the ambient intensity of the light.
+//  lightIntensity    - the instensity of the light.
+//  object            - the object tha defines the light.
+//  color             - the rgb of the light.
 //
 // Returns:
 // 	A Light.
 //
-func InitLight(lightPos entity.Point, specularDecay, radius float64) Light {
+func InitLight(ambientIntensity, lightIntensity float64, object general.Object, color []float64) Light {
 	lgt := Light{
-		AmbientIntensity:  utils.InitVector(3),
-		AmbientReflection: utils.InitVector(3),
-		LightIntensity:    utils.InitVector(3),
-		SpecularDecay:     specularDecay,
-		Radius:            radius,
-		LightPosition:     lightPos}
+		AmbientIntensity: ambientIntensity,
+		LightIntensity:   lightIntensity,
+		LightObject:      object,
+	}
 	return lgt
 }

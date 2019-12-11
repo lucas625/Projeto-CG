@@ -1,0 +1,32 @@
+{
+	"Pos": {
+		"Coordinates": [
+			0,
+			1,
+			3.2
+		]
+	},
+	"Look": {
+		"Coordinates": [
+			0,
+			0,
+			-1
+		]
+	},
+	"Up": {
+		"Coordinates": [
+			0,
+			1,
+			0
+		]
+	},
+	"Right": {
+		"Coordinates": [
+			1,
+			0,
+			0
+		]
+	},
+	"FieldOfView": 50.0,
+	"Near": 1.0
+}

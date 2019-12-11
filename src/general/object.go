@@ -69,6 +69,7 @@ func LoadJSONObjects(inPath string) *Objects {
 	utils.ShowError(err, "Failed to unmarshal objects.")
 	for _, obj := range objsAux.ObjList {
 		obj.CheckIntegrity()
+		obj.NormalizeNormals()
 	}
 	return &objsAux
 }
@@ -89,20 +90,30 @@ func InitObjects(label string, objlist []Object) *Objects {
 // Object is a class for all data of an object.
 //
 // Members:
-//  Name      - the name of the object.
-// 	Vertices  - pointer to a Vertices object.
-// 	Triangles - pointer to a list with all Triangles of the object.
-//  Normals   - pointer to a list of Vectors with all vertices normals.
-//  DiffuseReflection  - RGB for how diffuse is the object.
-//  SpecularReflection - RGB for how specular is the object.
+//  Name               - the name of the object.
+// 	Vertices           - pointer to a Vertices object.
+// 	Triangles          - pointer to a list with all Triangles of the object.
+//  Normals            - pointer to a list of Vectors with all vertices normals.
+//  Color              - RGB for the color of the object.
+//  SpecularDecay      - constant for how fast the specular component decays.
+//  SpecularReflection - the coeficient of specular reflection.
+//  TransReflection    - the coeficient for transmission.
+//  AmbientReflection  - RGB for the ambient reflection.
+//  DiffuseReflection  - Diffuse reflection coeficient.
+//  RoughNess          - How much reflections rays get distorted.
 //
 type Object struct {
 	Name               string
 	Vertices           entity.Vertices
 	Triangles          []entity.Triangle
 	Normals            []utils.Vector
-	DiffuseReflection  utils.Vector
-	SpecularReflection utils.Vector
+	Color              []float64
+	SpecularDecay      float64
+	SpecularReflection float64
+	TransReflection    float64
+	AmbientReflection  float64
+	DiffuseReflection  float64
+	RoughNess float64
 }
 
 // CheckIntegrity is a function to check the attributes of an object.
@@ -132,13 +143,31 @@ func (obj *Object) CheckIntegrity() {
 			utils.ShowError(errors.New("Invalid object"), "Normal length not equal 3.")
 		}
 	}
-	if len(obj.DiffuseReflection.Coordinates) != 3 {
-		utils.ShowError(errors.New("Invalid object"), "Diffuse Reflection length not equal 3.")
+	if len(obj.Color) != 3 {
+		utils.ShowError(errors.New("Invalid object"), "Color length not equal 3.")
 	}
-	if len(obj.SpecularReflection.Coordinates) != 3 {
-		utils.ShowError(errors.New("Invalid object"), "Specular Reflection length not equal 3.")
-	}
+}
 
+// GetNormalByBaricentricCoords is a function to calculate a vertice normal using baricientric coordinates.
+//
+// Parameters:
+// 	triangleIdx       - the index of the triangle.
+//  baricentricCoords - tha baricentric coords for the normal.
+//
+// Returns:
+//  the normal.
+//
+func (obj *Object) GetNormalByBaricentricCoords(triangleIdx int, baricentricCoords []float64) utils.Vector {
+	normals := make([]utils.Vector, 3)
+	for i := 0; i < 3; i++ {
+		normals[i] = utils.CMultVector(&obj.Normals[obj.Triangles[triangleIdx].Normals[i]], baricentricCoords[i])
+	}
+	resultingNormal := utils.InitVector(3)
+	for i := 0; i < 3; i++ {
+		resultingNormal = utils.SumVector(&resultingNormal, &normals[i], 1, 1)
+	}
+	resultingNormal = utils.NormalizeVector(&resultingNormal)
+	return resultingNormal
 }
 
 // NormalizeNormals is a function to normalize all triangle normals.
@@ -155,6 +184,23 @@ func (obj *Object) NormalizeNormals() {
 		auxV := utils.NormalizeVector(&normals[i])
 		obj.Normals[i] = auxV
 	}
+}
+
+// GetCenter is a function to get the center of the bounding box of the object.
+//
+// Parameters:
+// 	none
+//
+// Returns:
+//  the pos.
+//
+func (obj *Object) GetCenter() entity.Point {
+	objectBB := obj.GetBoundingBox()
+	pos := entity.InitPoint(3)
+	for j := 0; j < 3; j++ {
+		pos.Coordinates[j] = (objectBB[j] + objectBB[j+3]) / 2
+	}
+	return pos
 }
 
 // GetBoundingBox is a function to get the bounding box of an Object.
@@ -211,13 +257,19 @@ func (obj *Object) FindCamera(ptCamera *entity.Point) *camera.Camera {
 // 	vertices           - Vertices object with all points.
 //  triangles          - list of triangles.
 //  normals            - list of normal vectors.
-//  diffuseReflection  - the cam to the object.
-//  specularReflection - the specular reflection of the object.
+//  color              - the color of the object.
+//  specularDecay      - constant for how fast the specular component decays.
+//  ambientReflection  - coeficient for ambient reflection
+//  diffuseReflection  - the coeficient for transmission.
+//  specularReflection - the coeficient of specular reflection.
+//  transReflection    - the coeficient for transmission.
+//  roughNess          - How much reflections rays get distorted.
 //
 // Returns:
 //  the object.
 //
-func InitObject(name string, vertices entity.Vertices, triangles []entity.Triangle, normals []utils.Vector, diffuseReflection, specularReflection utils.Vector) Object {
-	obj := Object{Name: name, Vertices: vertices, Triangles: triangles, Normals: normals, DiffuseReflection: diffuseReflection, SpecularReflection: specularReflection}
+func InitObject(name string, vertices entity.Vertices, triangles []entity.Triangle, normals []utils.Vector, color []float64, specularDecay, ambientReflection, diffuseReflection, specularReflection, transReflection, roughNess float64) Object {
+	obj := Object{Name: name, Vertices: vertices, Triangles: triangles, Normals: normals, Color: color, SpecularDecay: specularDecay, AmbientReflection: ambientReflection, DiffuseReflection: diffuseReflection, SpecularReflection: specularReflection, TransReflection: transReflection, RoughNess: roughNess}
+	obj.CheckIntegrity()
 	return obj
 }

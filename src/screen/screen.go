@@ -5,62 +5,94 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/lucas625/Projeto-CG/src/camera"
-	"github.com/lucas625/Projeto-CG/src/entity"
 	"github.com/lucas625/Projeto-CG/src/utils"
 )
+
+// ColoredScreen is a class for image screen with colors.
+//
+// Members:
+// 	Colors - the color matrix.
+//
+type ColoredScreen struct {
+	Colors [][][]int
+	Screen
+}
+
+// InitColoredScreen is a function to initialize a colored screen.
+//
+// Parameters:
+// 	width  - the screen width.
+//  height - the screen height.
+//
+// Returns:
+// 	a colored Screen.
+//
+func InitColoredScreen(width, height int) ColoredScreen {
+	colors := make([][][]int, height)
+	for i := 0; i < height; i++ {
+		colors[i] = make([][]int, width)
+		for j := 0; j < width; j++ {
+			colors[i][j] = make([]int, 3)
+		}
+	}
+	return ColoredScreen{Screen: Screen{Width: width, Height: height}, Colors: colors}
+}
 
 // Screen is a class for image screen.
 //
 // Members:
-// 	Width  - the number of x pixels on the screen.
-// 	Height - the number of y pixels on the screen.
+// 	Width      - the number of x pixels on the screen.
+// 	Height     - the number of y pixels on the screen.
+//  CamToWorld - the matrix from cam to world.
 //
 type Screen struct {
-	Width  int
-	Height int
+	Width      int
+	Height     int
+	CamToWorld *utils.Matrix
 }
 
-// PixelToCamera is a function to get the position of a pixel in camera coordinates.
+// PixelToWorld is a function to get the position of a pixel in world coordinates.
 //
 // Parameters:
-// 	x   - position of the pixel.
-//  y   - position of the pixel.
-//  d   - distance viewport to cam (if negative, considered as 1).
-//  cam - the camera.
+// 	x        - position of the pixel.
+//  y        - position of the pixel.
+//  d        - distance viewport to cam.
+//  camWorld - the matrix camera to world.
+//  px       - the additional on x (0->1)
+//  py       - the additional on y (0->1)
+//  fov      - field of view in degrees.
 //
 // Returns:
-// 	a Point.
+// 	a Vector.
 //
-func (sc *Screen) PixelToCamera(x, y int, d float64, cam *camera.Camera) entity.Point {
-	if x >= sc.Width || y >= sc.Height {
-		utils.ShowError(errors.New("Invalid Pixel"), "X("+strconv.Itoa(x)+") or Y("+strconv.Itoa(y)+") invalid for screen("+strconv.Itoa(sc.Width)+", "+strconv.Itoa(sc.Height)+").")
+func (sc *Screen) PixelToWorld(x, y int, d float64, px, py, fov float64) utils.Vector {
+	if x >= sc.Height || y >= sc.Width {
+		utils.ShowError(errors.New("Invalid Pixel"), "X("+strconv.Itoa(x)+") or Y("+strconv.Itoa(y)+") invalid for screen("+strconv.Itoa(sc.Height)+", "+strconv.Itoa(sc.Width)+").")
 	}
-
-	NDCx := (float64(x) + 0.5) / float64(sc.Width)
-	NDCy := (float64(y) + 0.5) / float64(sc.Height)
-
-	screenx := (2 * NDCx) - 1
-	screeny := 1 - (2 * NDCy)
+	camWorld := sc.CamToWorld
 
 	aspectRatio := float64(sc.Width) / float64(sc.Height)
-	alpha := float64(90) // field of view
-	z := cam.Pos.Coordinates[3]
-	if d > 0 {
-		alpha = math.Atan(1/d) * 2
-		z = z + d
-	} else {
-		z = z + 1
+	alpha := (fov / 2) * math.Pi / 180.0
+	z := d
+
+	camerax := (2*(float64(x)+px)/float64(sc.Width) - 1) * aspectRatio * math.Tan(alpha)
+	cameray := (1 - 2*(float64(y)+py)/float64(sc.Height)) * math.Tan(alpha)
+
+	v := utils.InitVector(3)
+
+	v.Coordinates[0] = camerax
+	v.Coordinates[1] = cameray
+	v.Coordinates[2] = z
+
+	vMat := utils.VectorToHomogeneousCoord(&v)
+
+	vMatPos := utils.MultMatrix(camWorld, &vMat)
+	for i := 0; i < 3; i++ {
+		v.Coordinates[i] = vMatPos.Values[i][0]
 	}
+	vNormalized := utils.NormalizeVector(&v)
 
-	camerax := ((2 * screenx) - 1) * aspectRatio * math.Tan(alpha/2)
-	cameray := 1 - (2*screeny)*math.Tan(alpha/2)
-	p := entity.InitPoint(3)
-	p.Coordinates[0] = camerax
-	p.Coordinates[1] = cameray
-	p.Coordinates[2] = z
-
-	return p
+	return vNormalized
 }
 
 // InitScreen is a function to initialize a screen.
@@ -76,6 +108,6 @@ func InitScreen(width, height int) Screen {
 	if width < 0 || height < 0 {
 		utils.ShowError(errors.New("Invalid Screen"), "width("+strconv.Itoa(width)+") or height("+strconv.Itoa(height)+") invalid for screen.")
 	}
-	sc := Screen{width: width, height: height}
+	sc := Screen{Width: width, Height: height}
 	return sc
 }

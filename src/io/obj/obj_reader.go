@@ -32,6 +32,8 @@ func readTriangle(line string) *[]byte {
 		utils.ShowError(err, "Unable to convert to vertex index to int.")
 		normals[i], err = strconv.Atoi(splitedIndices[len(splitedIndices)-1])
 		utils.ShowError(err, "Unable to convert to normal index to int.")
+		vertices[i] = vertices[i] - 1
+		normals[i] = normals[i] - 1
 	}
 	triangle := entity.InitTriangle(vertices, normals)
 	triangleAsBytes, err := json.Marshal(triangle)
@@ -74,7 +76,7 @@ func readPoint(line string) *[]byte {
 	for i, c := range inp {
 		var err error
 		pt.Coordinates[i], err = strconv.ParseFloat(c, 64)
-		utils.ShowError(err, "Unable to convert coordinate to float.")
+		utils.ShowError(err, "Unable to convert coordinate to float Obj.")
 	}
 	ptAsBytes, err := json.Marshal(pt)
 	utils.ShowError(err, "Unable to marshal point.")
@@ -95,6 +97,8 @@ func readLine(line string) (int, *[]byte) {
 	case 'v':
 		if line[1] == 'n' {
 			return 2, readNormal(line)
+		} else if line[1] == 't' {
+			return 3, nil
 		}
 		return 0, readPoint(line) // vertex case
 	case 'f':
@@ -184,10 +188,14 @@ func ReadObj(objPath string) *general.Object {
 	vertices, triangles, normals := readLines(scanner)
 	name := getName(objPath)
 
-	diffuseReflection := utils.InitVector(3)
-	specularReflection := utils.InitVector(3)
-
-	object := general.InitObject(name, vertices, triangles, normals, diffuseReflection, specularReflection)
+	color := make([]float64, 3)
+	specularDecay := 100.0
+	ambientReflection := 0.0
+	diffuseReflection := 0.0
+	specularReflection := 0.0
+	transReflection := 0.0
+	roughNess := 0.0
+	object := general.InitObject(name, vertices, triangles, normals, color, specularDecay, ambientReflection, diffuseReflection, specularReflection, transReflection, roughNess)
 
 	err = scanner.Err()
 	utils.ShowError(err, "Error on reading file: "+absPath+".")

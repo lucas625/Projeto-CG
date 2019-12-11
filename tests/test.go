@@ -9,10 +9,13 @@ import (
 
 	"github.com/lucas625/Projeto-CG/src/utils"
 
+	"github.com/lucas625/Projeto-CG/src/algorithms/raycasting"
 	"github.com/lucas625/Projeto-CG/src/camera"
 	"github.com/lucas625/Projeto-CG/src/general"
 	"github.com/lucas625/Projeto-CG/src/io/obj"
 	"github.com/lucas625/Projeto-CG/src/light"
+	"github.com/lucas625/Projeto-CG/src/screen"
+	"github.com/lucas625/Projeto-CG/src/visualizer"
 )
 
 func main() {
@@ -39,7 +42,7 @@ func main() {
 		case 6:
 			objPath = "resources/obj/complex/spikedball.obj"
 		case 0:
-			if current > 1 {
+			if current >= 1 {
 				ended = true
 				continue
 			} else {
@@ -60,15 +63,21 @@ func main() {
 	}
 
 	objects := general.InitObjects("teste", objList)
-	objects.WriteJSONObjects(outPath)
+	objects.ObjList[0].Color = []float64{255, 0, 0}
 
 	cameraPath := "resources/json/camera.json"
 	cam := camera.LoadJSONCamera(cameraPath)
-	cam = objects.ObjList[0].FindCamera(&cam.Pos)
-	cam.WriteJSONCamera(outPath)
+	// cam = objects.ObjList[0].FindCamera(&cam.Pos)
 
-	lightPath := "resources/json/light.json"
-	lights := light.LoadJSONLights(lightPath)
-	lights.WriteJSONLights(outPath)
+	camMatrix := camera.CamToWorld(cam)
 
+	sc := screen.InitScreen(200, 200)
+	sc.CamToWorld = &camMatrix
+
+	lights := light.Lights{LightList: []light.Light{light.Light{}}}
+
+	rayCaster := raycasting.InitRayCaster(objects, &sc, cam, &lights)
+
+	colorScreen := rayCaster.Run()
+	visualizer.WritePPM(*colorScreen, outPath)
 }

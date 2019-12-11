@@ -114,6 +114,9 @@ type Object struct {
 	AmbientReflection  float64
 	DiffuseReflection  float64
 	RoughNess float64
+	Position entity.Point
+	IsSphere bool
+	Radius float64
 }
 
 // CheckIntegrity is a function to check the attributes of an object.

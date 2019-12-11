@@ -164,6 +164,48 @@ func (ptracer *PathTracer) FindNextRay(pos entity.Point, obj general.Object, tri
 	return line
 }
 
+// FindNextRay is a function to find the next line.
+//
+// Parameters:
+//  pos       - the point.
+//  obj       - the object.
+//  triangIdx - the index of the triangle.
+//  bCoords   - baricentric coords for each respective normal.
+//
+// Returns:
+// 	the line
+//
+func (ptracer *PathTracer) FindNextRaySphere(pos entity.Point, obj general.Object) entity.Line {
+	resultingNormal := entity.ExtractVector(&obj.Position, &pos)
+	resultingNormal = utils.NormalizeVector(&resultingNormal)
+
+	ktot := obj.DiffuseReflection + obj.SpecularReflection // + obj.TransReflection
+	r := 0.0 + rand.Float64()*ktot
+	vector := utils.Vector{Coordinates: []float64{1.0, 1.0, 1.0}}
+	if r <= obj.DiffuseReflection {
+		vector = RandomInSemiSphere(resultingNormal, pos)
+	} else if r <= obj.DiffuseReflection+obj.SpecularReflection {
+		lightPos := ptracer.Lgts.LightList[0].LightObject.GetCenter()
+		Lvector := entity.ExtractVector(&pos, &lightPos)
+		Lvector = utils.NormalizeVector(&Lvector)
+
+		constantPart := 2 * utils.DotProduct(&resultingNormal, &Lvector)
+
+		vector = utils.SumVector(&resultingNormal, &Lvector, constantPart, -1) // R = 2N(N.L) - L
+
+		offsetVector := RandomInSemiSphereSpecular()
+		offsetVector = utils.CMultVector(&offsetVector, obj.RoughNess)
+
+		vector = utils.SumVector(&vector, &offsetVector, 1, 1)
+
+	} else {
+		// use transmission (unavailable)
+	}
+	vector = utils.NormalizeVector(&vector)
+	line := entity.Line{Start: pos, Director: vector}
+	return line
+}
+
 // TraceRayDepth is a function to trace a ray and return the resulting color.
 //
 // Parameters:
@@ -181,18 +223,34 @@ func (ptracer *PathTracer) TraceRayDepth(line entity.Line, recursions int) []flo
 	closestTriangleIndex := -1
 	closestBCoords := make([]float64, 3)
 	for objIdx, obj := range ptracer.Objs.ObjList { // iterating through all objects
-		for triangIdx, triangle := range obj.Triangles { // iterating through all triangles of an object
-			points := make([]entity.Point, 3)
-			for pi := 0; pi < 3; pi++ { // getting triangle points
-				points[pi] = obj.Vertices.Points[triangle.Vertices[pi]]
+		if !obj.IsSphere {
+			for triangIdx, triangle := range obj.Triangles { // iterating through all triangles of an object
+				points := make([]entity.Point, 3)
+				for pi := 0; pi < 3; pi++ { // getting triangle points
+					points[pi] = obj.Vertices.Points[triangle.Vertices[pi]]
+				}
+				t, bCoords, intersected := line.IntersectTriangle(points)
+				if intersected {
+					if t > 0 && t < closestT {
+						closestT = t
+						closestObjIdx = objIdx
+						closestTriangleIndex = triangIdx
+						closestBCoords = bCoords
+					}
+				}
 			}
-			t, bCoords, intersected := line.IntersectTriangle(points)
+		}else {
+			ts, intersected := line.IntersectSphere(entity.InitSphere(obj.Position, obj.Radius))
 			if intersected {
-				if t > 0 && t < closestT {
+				if (ts[0] > 0 && ts[0] < closestT)  || ts[1] > 0 && ts[1] < closestT {
+					var t float64
+					if ts[0] > 0 && ts[0] < ts[1] {
+						t = ts[0]
+					} else {
+						t = ts[1]
+					}
 					closestT = t
 					closestObjIdx = objIdx
-					closestTriangleIndex = triangIdx
-					closestBCoords = bCoords
 				}
 			}
 		}
@@ -221,7 +279,12 @@ func (ptracer *PathTracer) TraceRayDepth(line entity.Line, recursions int) []flo
 		if closestObjIdx != -1 {
 			colorAux := []float64{1, 1, 1}
 			if recursions > 0 {
-				newLine := ptracer.FindNextRay(line.FindPos(closestT), ptracer.Objs.ObjList[closestObjIdx], closestTriangleIndex, closestBCoords)
+				var newLine entity.Line
+				if !ptracer.Objs.ObjList[closestObjIdx].IsSphere {
+					newLine = ptracer.FindNextRay(line.FindPos(closestT), ptracer.Objs.ObjList[closestObjIdx], closestTriangleIndex, closestBCoords)
+				} else {
+					newLine = ptracer.FindNextRaySphere(line.FindPos(closestT), ptracer.Objs.ObjList[closestObjIdx])
+				}
 				colorAux = ptracer.TraceRayDepth(newLine, recursions-1)
 			}
 			for i := 0; i < 3; i++ {
@@ -269,18 +332,34 @@ func (ptracer *PathTracer) TraceRay(lp, cp, rays, recursions int) []int {
 				closestBCoords := make([]float64, 3)
 				
 				for objIdx, obj := range ptracer.Objs.ObjList { // iterating through all objects
-					for triangIdx, triangle := range obj.Triangles { // iterating through all triangles of an object
-						points := make([]entity.Point, 3)
-						for pi := 0; pi < 3; pi++ { // getting triangle points
-							points[pi] = obj.Vertices.Points[triangle.Vertices[pi]]
+					if !obj.IsSphere {
+						for triangIdx, triangle := range obj.Triangles { // iterating through all triangles of an object
+							points := make([]entity.Point, 3)
+							for pi := 0; pi < 3; pi++ { // getting triangle points
+								points[pi] = obj.Vertices.Points[triangle.Vertices[pi]]
+							}
+							t, bCoords, intersected := line.IntersectTriangle(points)
+							if intersected {
+								if t >= 1 && t < closestT {
+									closestT = t
+									closestObjIdx = objIdx
+									closestTriangleIndex = triangIdx
+									closestBCoords = bCoords
+								}
+							}
 						}
-						t, bCoords, intersected := line.IntersectTriangle(points)
+					}else {
+						ts, intersected := line.IntersectSphere(entity.InitSphere(obj.Position, obj.Radius))
 						if intersected {
-							if t >= 1 && t < closestT {
+							if (ts[0] >= 1 && ts[0] < closestT)  || ts[1] >= 1 && ts[1] < closestT {
+								var t float64
+								if ts[0] >= 1 && ts[0] < ts[1] {
+									t = ts[0]
+								} else {
+									t = ts[1]
+								}
 								closestT = t
 								closestObjIdx = objIdx
-								closestTriangleIndex = triangIdx
-								closestBCoords = bCoords
 							}
 						}
 					}
@@ -309,8 +388,13 @@ func (ptracer *PathTracer) TraceRay(lp, cp, rays, recursions int) []int {
 					if closestObjIdx != -1 {
 						colorAux := []float64{0, 0, 0}
 						if recursions > 0 {
-							newLine := ptracer.FindNextRay(line.FindPos(closestT), ptracer.Objs.ObjList[closestObjIdx], closestTriangleIndex, closestBCoords)
-							colorAux = ptracer.TraceRayDepth(newLine, recursions-1)
+							var newLine entity.Line
+							if !ptracer.Objs.ObjList[closestObjIdx].IsSphere {
+								newLine = ptracer.FindNextRay(line.FindPos(closestT), ptracer.Objs.ObjList[closestObjIdx], closestTriangleIndex, closestBCoords)
+							}else {
+								newLine = ptracer.FindNextRaySphere(line.FindPos(closestT), ptracer.Objs.ObjList[closestObjIdx])
+							}
+							colorAux = ptracer.TraceRayDepth(newLine, recursions)
 						}
 						for i := 0; i < 3; i++ {
 							color[i] = ptracer.Objs.ObjList[closestObjIdx].Color[i] * colorAux[i]

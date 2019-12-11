@@ -902,6 +902,34 @@
 			"AmbientReflection": 0,
 			"DiffuseReflection": 1,
 			"RoughNess": 0
+		},
+		{
+			"Name": "sphereball",
+			"Vertices": {
+				"Points": []
+			},
+			"Triangles": [],
+			"Normals": [],
+			"Color": [
+				0.5,
+				0.5,
+				0.5
+			],
+			"SpecularDecay": 0,
+			"SpecularReflection": 0,
+			"TransReflection": 0,
+			"AmbientReflection": 0,
+			"DiffuseReflection": 1,
+			"RoughNess": 0,
+			"Position": {
+				"Coordinates": [
+					1,
+					1,
+					1
+				]
+			},
+			"IsSphere": true,
+			"Raius": 0.7
 		}
 	]
 }

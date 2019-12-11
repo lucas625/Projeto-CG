@@ -633,11 +633,11 @@
 				0.7
 			],
 			"SpecularDecay": 5,
-			"SpecularReflection": 0,
+			"SpecularReflection": 1.5,
 			"TransReflection": 0,
 			"AmbientReflection": 0,
-			"DiffuseReflection": 1,
-			"RoughNess": 0
+			"DiffuseReflection": 0.5,
+			"RoughNess": 0.3
 		}
 	]
 }

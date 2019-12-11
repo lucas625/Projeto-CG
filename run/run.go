@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 
 	"github.com/lucas625/Projeto-CG/src/algorithms/pathtracing"
 	"github.com/lucas625/Projeto-CG/src/camera"
@@ -12,20 +11,17 @@ import (
 )
 
 func main() {
-	iterations := 10
-	raysPerPixel := 500
+	iterations := 5
+	raysPerPixel := 50
 
 	cam := camera.LoadJSONCamera("resources/run/json/camera.json")
 	lights := light.LoadJSONLights("resources/run/json/light.json")
 	objects := general.LoadJSONObjects("resources/run/json/objects.json")
-	fmt.Println(cam)
-	fmt.Println(lights)
-	fmt.Println(objects)
 	outPath := "out/pathtracing"
 
 	// getting screen
 	camMatrix := camera.CamToWorld(cam)
-	sc := screen.InitScreen(200, 200)
+	sc := screen.InitScreen(600, 600)
 	sc.CamToWorld = &camMatrix
 
 	pathTracer := pathtracing.InitPathTracer(objects, &sc, cam, lights)

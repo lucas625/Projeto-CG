@@ -86,6 +86,37 @@ func RandomInSemiSphere(normal utils.Vector, pos entity.Point) utils.Vector {
 	return vect
 }
 
+// RandomInSemiSphereSpecular is a function to find a ray for diffuse reflection in semisphere.
+//
+// Parameters:
+//  none
+//
+// Returns:
+// 	the vector.
+//
+func RandomInSemiSphereSpecular() utils.Vector {
+	
+	found := false
+
+	var random1,random2,random3 float64
+	var v utils.Vector
+	for !found {
+		found = true
+		random1 = rand.Float64()
+		random2 = rand.Float64()
+		random3 = rand.Float64()
+
+		v = utils.Vector{Coordinates: []float64{random1, random2, random3}}
+		v = utils.CMultVector(&v, 2)
+		vaux := utils.Vector{Coordinates: []float64{1,1,1}}
+		v = utils.SumVector(&v, &vaux, 1, -1)
+		if math.Pow(utils.VectorNorm(&v),2) >= 1{
+			found = false
+		}
+	}
+	return v
+}
+
 // FindNextRay is a function to find the next line.
 //
 // Parameters:
@@ -110,7 +141,6 @@ func (ptracer *PathTracer) FindNextRay(pos entity.Point, obj general.Object, tri
 	r := 0.0 + rand.Float64()*ktot
 	vector := utils.Vector{Coordinates: []float64{1.0, 1.0, 1.0}}
 	if r <= obj.DiffuseReflection {
-		// FIXME: calculate correct diffuse reflection
 		vector = RandomInSemiSphere(resultingNormal, pos)
 	} else if r <= obj.DiffuseReflection+obj.SpecularReflection {
 		lightPos := ptracer.Lgts.LightList[0].LightObject.GetCenter()
@@ -118,7 +148,14 @@ func (ptracer *PathTracer) FindNextRay(pos entity.Point, obj general.Object, tri
 		Lvector = utils.NormalizeVector(&Lvector)
 
 		constantPart := 2 * utils.DotProduct(&resultingNormal, &Lvector)
+
 		vector = utils.SumVector(&resultingNormal, &Lvector, constantPart, -1) // R = 2N(N.L) - L
+
+		offsetVector := RandomInSemiSphereSpecular()
+		offsetVector = utils.CMultVector(&offsetVector, obj.RoughNess)
+
+		vector = utils.SumVector(&vector, &offsetVector, 1, 1)
+
 	} else {
 		// use transmission (unavailable)
 	}

@@ -79,7 +79,8 @@
 			"SpecularReflection": 0,
 			"TransReflection": 0,
 			"AmbientReflection": 0,
-			"DiffuseReflection": 1
+			"DiffuseReflection": 1,
+			"RoughNess": 0
 		},
 		{
 			"Name": "left_wall",
@@ -159,7 +160,8 @@
 			"SpecularReflection": 0,
 			"TransReflection": 0,
 			"AmbientReflection": 0,
-			"DiffuseReflection": 1
+			"DiffuseReflection": 1,
+			"RoughNess": 0
 		},
 		{
 			"Name": "right_wall",
@@ -239,7 +241,8 @@
 			"SpecularReflection": 0,
 			"TransReflection": 0,
 			"AmbientReflection": 0,
-			"DiffuseReflection": 1.0
+			"DiffuseReflection": 1,
+			"RoughNess": 0
 		},
 		{
 			"Name": "ground",
@@ -316,10 +319,11 @@
 				0.7
 			],
 			"SpecularDecay": 5,
-			"SpecularReflection": 0.3,
+			"SpecularReflection": 1,
 			"TransReflection": 0,
 			"AmbientReflection": 0.3,
-			"DiffuseReflection": 0.7
+			"DiffuseReflection": 0.4,
+			"RoughNess": 0.3
 		},
 		{
 			"Name": "ceiling",
@@ -399,7 +403,8 @@
 			"SpecularReflection": 0,
 			"TransReflection": 0,
 			"AmbientReflection": 0,
-			"DiffuseReflection": 1
+			"DiffuseReflection": 1,
+			"RoughNess": 0
 		},
 		{
 			"Name": "box-only",
@@ -631,7 +636,8 @@
 			"SpecularReflection": 0,
 			"TransReflection": 0,
 			"AmbientReflection": 0,
-			"DiffuseReflection": 1
+			"DiffuseReflection": 1,
+			"RoughNess": 0
 		}
 	]
 }

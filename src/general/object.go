@@ -100,6 +100,7 @@ func InitObjects(label string, objlist []Object) *Objects {
 //  TransReflection    - the coeficient for transmission.
 //  AmbientReflection  - RGB for the ambient reflection.
 //  DiffuseReflection  - Diffuse reflection coeficient.
+//  RoughNess          - How much reflections rays get distorted.
 //
 type Object struct {
 	Name               string
@@ -112,6 +113,7 @@ type Object struct {
 	TransReflection    float64
 	AmbientReflection  float64
 	DiffuseReflection  float64
+	RoughNess float64
 }
 
 // CheckIntegrity is a function to check the attributes of an object.
@@ -257,14 +259,17 @@ func (obj *Object) FindCamera(ptCamera *entity.Point) *camera.Camera {
 //  normals            - list of normal vectors.
 //  color              - the color of the object.
 //  specularDecay      - constant for how fast the specular component decays.
+//  ambientReflection  - coeficient for ambient reflection
+//  diffuseReflection  - the coeficient for transmission.
 //  specularReflection - the coeficient of specular reflection.
-//  TransReflection    - the coeficient for transmission.
+//  transReflection    - the coeficient for transmission.
+//  roughNess          - How much reflections rays get distorted.
 //
 // Returns:
 //  the object.
 //
-func InitObject(name string, vertices entity.Vertices, triangles []entity.Triangle, normals []utils.Vector, color []float64, specularDecay, ambientReflection, diffuseReflection, specularReflection, transReflection float64) Object {
-	obj := Object{Name: name, Vertices: vertices, Triangles: triangles, Normals: normals, Color: color, SpecularDecay: specularDecay, AmbientReflection: ambientReflection, DiffuseReflection: diffuseReflection, SpecularReflection: specularReflection, TransReflection: transReflection}
+func InitObject(name string, vertices entity.Vertices, triangles []entity.Triangle, normals []utils.Vector, color []float64, specularDecay, ambientReflection, diffuseReflection, specularReflection, transReflection, roughNess float64) Object {
+	obj := Object{Name: name, Vertices: vertices, Triangles: triangles, Normals: normals, Color: color, SpecularDecay: specularDecay, AmbientReflection: ambientReflection, DiffuseReflection: diffuseReflection, SpecularReflection: specularReflection, TransReflection: transReflection, RoughNess: roughNess}
 	obj.CheckIntegrity()
 	return obj
 }

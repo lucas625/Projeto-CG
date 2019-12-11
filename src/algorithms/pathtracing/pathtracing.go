@@ -29,6 +29,32 @@ type PathTracer struct {
 	Lgts        *light.Lights
 }
 
+// RandomInSemiSphere is a function to find a ray for diffuse reflection in semisphere.
+//
+// Parameters:
+//  normal - the normal.
+//
+// Returns:
+// 	the vector.
+//
+func RandomInSemiSphere(normal utils.Vector) utils.Vector {
+	random1 := rand.Float64()
+	random2 := rand.Float64()
+	v1 := utils.Vector{Coordinates: []float64{random1 + normal.Coordinates[0], -1 * normal.Coordinates[1], -1 * normal.Coordinates[2]}}
+	v1 = utils.NormalizeVector(&v1)
+	if utils.DotProduct(&normal, &v1) < 0 { // cos
+		random1 = -1 * random1
+	}
+	v2 := utils.Vector{Coordinates: []float64{-1 * normal.Coordinates[0], random2 + normal.Coordinates[1], -1 * normal.Coordinates[2]}}
+	v2 = utils.NormalizeVector(&v2)
+	if utils.DotProduct(&normal, &v2) < 0 {
+		random2 = -1 * random2
+	}
+	resultingVector := utils.Vector{Coordinates: []float64{normal.Coordinates[0] + random1, normal.Coordinates[1] + random2, normal.Coordinates[2]}}
+
+	return resultingVector
+}
+
 // FindNextRay is a function to find the next line.
 //
 // Parameters:
@@ -49,25 +75,12 @@ func (ptracer *PathTracer) FindNextRay(pos entity.Point, obj general.Object, tri
 	resultingNormal = utils.SumVector(&resultingNormal, &normals[2], 1, bCoords[2])
 	resultingNormal = utils.NormalizeVector(&resultingNormal)
 
-	ktot := obj.TransReflection + obj.DiffuseReflection + obj.SpecularReflection
+	ktot := obj.DiffuseReflection + obj.SpecularReflection // + obj.TransReflection
 	r := 0.0 + rand.Float64()*ktot
 	vector := utils.Vector{Coordinates: []float64{1.0, 1.0, 1.0}}
 	if r <= obj.DiffuseReflection {
 		// FIXME: calculate correct diffuse reflection
-		R1 := rand.Float64()
-		R2 := rand.Float64()
-
-		phi := 1 / math.Cos(math.Sqrt(R1))
-		theta := 2 * math.Pi * R2
-
-		lightPos := ptracer.Lgts.LightList[0].LightObject.GetCenter()
-		Lvector := entity.ExtractVector(&pos, &lightPos)
-		Lvector = utils.NormalizeVector(&Lvector)
-
-		constantPart := 2 * utils.DotProduct(&resultingNormal, &Lvector)
-		vector = utils.SumVector(&resultingNormal, &Lvector, constantPart, -1) // R = 2N(N.L) - L
-		vector.Coordinates[0] = vector.Coordinates[0] * phi
-		vector.Coordinates[1] = vector.Coordinates[1] * theta
+		vector = RandomInSemiSphere(resultingNormal)
 	} else if r <= obj.DiffuseReflection+obj.SpecularReflection {
 		lightPos := ptracer.Lgts.LightList[0].LightObject.GetCenter()
 		Lvector := entity.ExtractVector(&pos, &lightPos)

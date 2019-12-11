@@ -188,7 +188,7 @@ func ReadObj(objPath string) *general.Object {
 	vertices, triangles, normals := readLines(scanner)
 	name := getName(objPath)
 
-	color := make([]int, 3)
+	color := make([]float64, 3)
 	specularDecay := 100.0
 	ambientReflection := 0.0
 	diffuseReflection := 0.0

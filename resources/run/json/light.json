@@ -1,12 +1,12 @@
 {
 	"LightList": [
 		{
-			"AmbientIntensity": 0.5,
+			"AmbientIntensity": 0,
 			"LightIntensity": 1.0,
 			"Color": [
-				255,
-				255,
-				255
+				1.0,
+				1.0,
+				1.0
 			],
 			"LightObject": {
 				"Name": "light",

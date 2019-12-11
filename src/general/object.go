@@ -106,7 +106,7 @@ type Object struct {
 	Vertices           entity.Vertices
 	Triangles          []entity.Triangle
 	Normals            []utils.Vector
-	Color              []int
+	Color              []float64
 	SpecularDecay      float64
 	SpecularReflection float64
 	TransReflection    float64
@@ -263,7 +263,7 @@ func (obj *Object) FindCamera(ptCamera *entity.Point) *camera.Camera {
 // Returns:
 //  the object.
 //
-func InitObject(name string, vertices entity.Vertices, triangles []entity.Triangle, normals []utils.Vector, color []int, specularDecay, ambientReflection, diffuseReflection, specularReflection, transReflection float64) Object {
+func InitObject(name string, vertices entity.Vertices, triangles []entity.Triangle, normals []utils.Vector, color []float64, specularDecay, ambientReflection, diffuseReflection, specularReflection, transReflection float64) Object {
 	obj := Object{Name: name, Vertices: vertices, Triangles: triangles, Normals: normals, Color: color, SpecularDecay: specularDecay, AmbientReflection: ambientReflection, DiffuseReflection: diffuseReflection, SpecularReflection: specularReflection, TransReflection: transReflection}
 	obj.CheckIntegrity()
 	return obj

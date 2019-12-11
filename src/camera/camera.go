@@ -16,16 +16,20 @@ import (
 // Camera is a class for cameras.
 //
 // Members:
-// 	Pos   - the position of the camera.
-// 	Look  - vector to were the camera is looking.
-//  Up    - vector head of the camera.
-//  Right - side vector of the camera.
+// 	Pos         - the position of the camera.
+// 	Look        - vector to were the camera is looking.
+//  Up          - vector head of the camera.
+//  Right       - side vector of the camera.
+//  FieldOfView - the camera field of view in degrees.
+//  Near        - distance to the screen.
 //
 type Camera struct {
-	Pos   entity.Point
-	Look  utils.Vector
-	Up    utils.Vector
-	Right utils.Vector
+	Pos         entity.Point
+	Look        utils.Vector
+	Up          utils.Vector
+	Right       utils.Vector
+	FieldOfView float64
+	Near        float64
 }
 
 // CamToHomogeneousMatrix is a function to create the matrix ready(after transposition) to multiply the points.
@@ -170,18 +174,20 @@ func LoadJSONCamera(inPath string) *Camera {
 // 	look  - vector to were the camera is looking.
 //  up    - vector head of the camera.
 //  right - side vector of the camera.
+//  fov   - the field of view in degrees.
+//  near  - distance to the screen.
 //
 // Returns:
 // 	A Camera.
 //
-func InitCamera(pos entity.Point, look, up, right utils.Vector) Camera {
+func InitCamera(pos entity.Point, look, up, right utils.Vector, fov, near float64) Camera {
 	if len(pos.Coordinates) != 3 {
 		log.Fatalf("Invalid length of Camera point %d.\n", len(pos.Coordinates))
 	}
 	CheckLenVector(look)
 	CheckLenVector(up)
 	CheckLenVector(right)
-	cam := Camera{Pos: pos, Look: look, Up: up, Right: right}
+	cam := Camera{Pos: pos, Look: look, Up: up, Right: right, FieldOfView: fov, Near: near}
 	return cam
 }
 
@@ -205,5 +211,5 @@ func InitCameraWithPoints(pos, target *entity.Point) Camera {
 	up := utils.VectorCrossProduct(&look, &right)
 	up = utils.NormalizeVector(&up)
 
-	return InitCamera(*pos, look, up, right)
+	return InitCamera(*pos, look, up, right, 50.0, 1)
 }

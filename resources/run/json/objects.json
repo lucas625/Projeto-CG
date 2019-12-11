@@ -71,15 +71,15 @@
 				}
 			],
 			"Color": [
-				255,
-				255,
-				255
+				1.0,
+				1.0,
+				1.0
 			],
 			"SpecularDecay": 5,
 			"SpecularReflection": 0,
 			"TransReflection": 0,
-			"AmbientReflection": 0.3,
-			"DiffuseReflection": 0.7
+			"AmbientReflection": 0,
+			"DiffuseReflection": 1
 		},
 		{
 			"Name": "left_wall",
@@ -151,15 +151,15 @@
 				}
 			],
 			"Color": [
-				255,
+				1.0,
 				0,
 				0
 			],
 			"SpecularDecay": 5,
 			"SpecularReflection": 0,
 			"TransReflection": 0,
-			"AmbientReflection": 0.3,
-			"DiffuseReflection": 0.7
+			"AmbientReflection": 0,
+			"DiffuseReflection": 1
 		},
 		{
 			"Name": "right_wall",
@@ -232,14 +232,14 @@
 			],
 			"Color": [
 				0,
-				255,
+				1.0,
 				0
 			],
 			"SpecularDecay": 5,
 			"SpecularReflection": 0,
 			"TransReflection": 0,
-			"AmbientReflection": 0.3,
-			"DiffuseReflection": 0.7
+			"AmbientReflection": 0,
+			"DiffuseReflection": 1.0
 		},
 		{
 			"Name": "ground",
@@ -311,12 +311,12 @@
 				}
 			],
 			"Color": [
-				255,
-				255,
-				255
+				1.0,
+				1.0,
+				1.0
 			],
 			"SpecularDecay": 5,
-			"SpecularReflection": 0,
+			"SpecularReflection": 0.3,
 			"TransReflection": 0,
 			"AmbientReflection": 0.3,
 			"DiffuseReflection": 0.7
@@ -391,15 +391,15 @@
 				}
 			],
 			"Color": [
-				255,
-				255,
-				255
+				0,
+				0,
+				1.0
 			],
 			"SpecularDecay": 5,
 			"SpecularReflection": 0,
 			"TransReflection": 0,
-			"AmbientReflection": 0.3,
-			"DiffuseReflection": 0.7
+			"AmbientReflection": 0,
+			"DiffuseReflection": 1
 		},
 		{
 			"Name": "box-only",
@@ -623,15 +623,15 @@
 				}
 			],
 			"Color": [
-				255,
-				255,
-				255
+				0,
+				0,
+				0
 			],
 			"SpecularDecay": 5,
 			"SpecularReflection": 0,
 			"TransReflection": 0,
-			"AmbientReflection": 0.3,
-			"DiffuseReflection": 0.7
+			"AmbientReflection": 0,
+			"DiffuseReflection": 1
 		}
 	]
 }

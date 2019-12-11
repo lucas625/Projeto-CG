@@ -36,7 +36,7 @@ type RayCaster struct {
 // 	the colored screen painted at that position.
 //
 func (rcaster *RayCaster) TraceRay(coloredScreen *screen.ColoredScreen, lp, cp int) {
-	screenV := rcaster.PixelScreen.PixelToWorld(lp, cp, 1.0, 0.5, 0.5)
+	screenV := rcaster.PixelScreen.PixelToWorld(lp, cp, 1.0, 0.5, 0.5, 50)
 	line := entity.Line{Start: rcaster.Cam.Pos, Director: screenV}
 	color := make([]int, 3)
 
@@ -77,7 +77,7 @@ func (rcaster *RayCaster) TraceRay(coloredScreen *screen.ColoredScreen, lp, cp i
 	// }
 	if !lightClosest {
 		if closestObjIdx != -1 {
-			color = rcaster.Objs.ObjList[closestObjIdx].Color
+			color = []int{255, 0, 0}
 		}
 		coloredScreen.Colors[lp][cp] = color
 	} else {

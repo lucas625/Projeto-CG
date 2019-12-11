@@ -63,7 +63,7 @@ func main() {
 	}
 
 	objects := general.InitObjects("teste", objList)
-	objects.ObjList[0].Color = []int{255, 0, 0}
+	objects.ObjList[0].Color = []float64{255, 0, 0}
 
 	cameraPath := "resources/json/camera.json"
 	cam := camera.LoadJSONCamera(cameraPath)
@@ -74,10 +74,9 @@ func main() {
 	sc := screen.InitScreen(200, 200)
 	sc.CamToWorld = &camMatrix
 
-	lightPath := "resources/json/light.json"
-	lights := light.LoadJSONLights(lightPath)
+	lights := light.Lights{LightList: []light.Light{light.Light{}}}
 
-	rayCaster := raycasting.InitRayCaster(objects, &sc, cam, lights)
+	rayCaster := raycasting.InitRayCaster(objects, &sc, cam, &lights)
 
 	colorScreen := rayCaster.Run()
 	visualizer.WritePPM(*colorScreen, outPath)

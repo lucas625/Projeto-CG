@@ -98,7 +98,7 @@ func InitLights(lightList []Light) Lights {
 type Light struct {
 	AmbientIntensity float64
 	LightIntensity   float64
-	Color            []int
+	Color            []float64
 	LightObject      general.Object
 }
 
@@ -113,7 +113,7 @@ type Light struct {
 // Returns:
 // 	A Light.
 //
-func InitLight(ambientIntensity, lightIntensity float64, object general.Object, color []int) Light {
+func InitLight(ambientIntensity, lightIntensity float64, object general.Object, color []float64) Light {
 	lgt := Light{
 		AmbientIntensity: ambientIntensity,
 		LightIntensity:   lightIntensity,

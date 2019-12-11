@@ -1,8 +1,10 @@
-package raycasting
+package pathtracing
 
 import (
-	"errors"
+	"fmt"
 	"math"
+	"math/rand"
+	"time"
 
 	"github.com/lucas625/Projeto-CG/src/camera"
 	"github.com/lucas625/Projeto-CG/src/entity"
@@ -27,154 +29,228 @@ type PathTracer struct {
 	Lgts        *light.Lights
 }
 
-// CalculateColor is a function to calculate the color at a point.
+// FindNextRay is a function to find the next line.
 //
 // Parameters:
-//	objIdx      - the index of the object.
-//  triangleIdx - the index of the triangle.
-//  bcoords     - the baricentric coordinates of the point.
-//  pos         - the point.
-//  isShadow    - a flag telling if is a shadow for each light.
+//  pos       - the point.
+//  obj       - the object.
+//  triangIdx - the index of the triangle.
+//  bCoords   - baricentric coords for each respective normal.
 //
 // Returns:
-// 	the color at a given point.
+// 	the line
 //
-func (ptracer *PathTracer) CalculateColor(objIdx, triangleIdx int, bcoords []float64, pos entity.Point, isShadow []bool) []int {
-	resultColor := make([]int, 3)
-	obj := ptracer.Objs.ObjList[objIdx]
+func (ptracer *PathTracer) FindNextRay(pos entity.Point, obj general.Object, triangleIdx int, bCoords []float64) entity.Line {
+	normals := make([]utils.Vector, 3)
+	for i := 0; i < 3; i++ {
+		normals[i] = obj.Normals[obj.Triangles[triangleIdx].Normals[i]]
+	}
+	resultingNormal := utils.SumVector(&normals[0], &normals[1], bCoords[0], bCoords[1])
+	resultingNormal = utils.SumVector(&resultingNormal, &normals[2], 1, bCoords[2])
+	resultingNormal = utils.NormalizeVector(&resultingNormal)
 
-	Nvector := obj.GetNormalByBaricentricCoords(triangleIdx, bcoords)
-	Nvector = utils.NormalizeVector(&Nvector)
+	ktot := obj.TransReflection + obj.DiffuseReflection + obj.SpecularReflection
+	r := 0.0 + rand.Float64()*ktot
+	vector := utils.Vector{Coordinates: []float64{1.0, 1.0, 1.0}}
+	if r <= obj.DiffuseReflection {
+		// FIXME: calculate correct diffuse reflection
+		lightPos := ptracer.Lgts.LightList[0].LightObject.GetCenter()
+		Lvector := entity.ExtractVector(&pos, &lightPos)
+		Lvector = utils.NormalizeVector(&Lvector)
 
-	Vvector := entity.ExtractVector(&pos, &ptracer.Cam.Pos)
-	Vvector = utils.NormalizeVector(&Vvector)
+		constantPart := 2 * utils.DotProduct(&resultingNormal, &Lvector)
+		vector = utils.SumVector(&resultingNormal, &Lvector, constantPart, -1) // R = 2N(N.L) - L
+	} else if r <= obj.DiffuseReflection+obj.SpecularReflection {
+		lightPos := ptracer.Lgts.LightList[0].LightObject.GetCenter()
+		Lvector := entity.ExtractVector(&pos, &lightPos)
+		Lvector = utils.NormalizeVector(&Lvector)
 
-	for lidx, lgt := range ptracer.Lgts.LightList {
-		if !isShadow[lidx] { // only calculates the color if isn't a shadow point
-			ambientColor := make([]float64, 3)
-			diffuseColor := make([]float64, 3)
-			specularColor := make([]float64, 3)
+		constantPart := 2 * utils.DotProduct(&resultingNormal, &Lvector)
+		vector = utils.SumVector(&resultingNormal, &Lvector, constantPart, -1) // R = 2N(N.L) - L
+	} else {
+		// use transmission (unavailable)
+	}
+	vector = utils.NormalizeVector(&vector)
+	line := entity.Line{Start: pos, Director: vector}
+	return line
+}
 
-			lightPos := lgt.LightObject.GetCenter()
-			Lvector := entity.ExtractVector(&pos, &lightPos)
-			Lvector = utils.NormalizeVector(&Lvector)
+// TraceRayDepth is a function to trace a ray and return the resulting color.
+//
+// Parameters:
+//  line       - the ray.
+//  recursions - number of recursions.
+//
+// Returns:
+// 	the rgb color at a given position.
+//
+func (ptracer *PathTracer) TraceRayDepth(line entity.Line, recursions int) []float64 {
+	color := make([]float64, 3)
 
-			raux := utils.CMultVector(&Nvector, utils.DotProduct(&Nvector, &Lvector)*2)
-			Rvector := utils.SumVector(&raux, &Lvector, 1, -1)
-			Rvector = utils.NormalizeVector(&Rvector)
-
-			for i := 0; i < 3; i++ {
-				ambientColor[i] = lgt.AmbientIntensity * obj.AmbientReflection * float64(obj.Color[i])
-				diffuseColor[i] = lgt.LightIntensity * obj.DiffuseReflection * float64(obj.Color[i])
-				specularColor[i] = lgt.LightIntensity * obj.SpecularReflection * math.Pow(utils.DotProduct(&Rvector, &Vvector), obj.SpecularDecay) * float64(lgt.Color[i])
-				resultColor[i] = resultColor[i] + int(math.Floor(ambientColor[i]+diffuseColor[i]+specularColor[i]))
+	closestT := math.MaxFloat64
+	closestObjIdx := -1
+	closestTriangleIndex := -1
+	closestBCoords := make([]float64, 3)
+	for objIdx, obj := range ptracer.Objs.ObjList { // iterating through all objects
+		for triangIdx, triangle := range obj.Triangles { // iterating through all triangles of an object
+			points := make([]entity.Point, 3)
+			for pi := 0; pi < 3; pi++ { // getting triangle points
+				points[pi] = obj.Vertices.Points[triangle.Vertices[pi]]
+			}
+			t, bCoords, intersected := line.IntersectTriangle(points)
+			if intersected {
+				if t > 0 && t < closestT {
+					closestT = t
+					closestObjIdx = objIdx
+					closestTriangleIndex = triangIdx
+					closestBCoords = bCoords
+				}
 			}
 		}
 	}
-	for i := 0; i < 3; i++ {
-		if resultColor[i] > 255 {
-			resultColor[i] = 255
-		} else if resultColor[i] < 0 {
-			utils.ShowError(errors.New("Invalid color"), "Color less than 0")
+
+	// intersecting lights
+	lightClosest := false
+	for lgtIdx, lgt := range ptracer.Lgts.LightList {
+		for _, triangle := range lgt.LightObject.Triangles { // iterating through all triangles of an object
+			points := make([]entity.Point, 3)
+			for pi := 0; pi < 3; pi++ { // getting triangle points
+				points[pi] = lgt.LightObject.Vertices.Points[triangle.Vertices[pi]]
+			}
+			t, _, intersected := line.IntersectTriangle(points)
+			if intersected {
+				if t > 0 && t <= closestT {
+					lightClosest = true
+					closestT = t
+					closestObjIdx = lgtIdx
+				}
+			}
 		}
 	}
-	return resultColor
-}
 
-// IntersectLight is a function to find the intersection with the light.
-//
-// Parameters:
-//	line     - the ray.
-//  lgtIndex - the index of the light.
-//
-// Returns:
-// 	t         - the line parameter.
-//  intersect - a flag telling if intersected the light.
-//
-func (ptracer *PathTracer) IntersectLight(line entity.Line, lgtIndex int) (float64, bool) {
-	t := 0.0
-	intersect := false
-	// FIXME: implement light intersection logic.
-	return t, intersect
-}
-
-// IsShadow is a function to determine if a point is a shadow.
-//
-// Parameters:
-//	pos - the point.
-//
-// Returns:
-// 	the flag telling if is a shadow for every light.
-//
-func (ptracer *PathTracer) IsShadow(pos entity.Point) []bool {
-	isShadow := make([]bool, len(ptracer.Lgts.LightList))
-	for i, lgt := range ptracer.Lgts.LightList {
-		lightPos := lgt.LightObject.GetCenter()
-		line := entity.ExtractLine(pos, lightPos)
-		line.Director = utils.NormalizeVector(&line.Director)
-		_, isShadow[i] = ptracer.IntersectLight(line, i)
+	if !lightClosest {
+		if closestObjIdx != -1 {
+			colorAux := []float64{1, 1, 1}
+			if recursions > 0 {
+				newLine := ptracer.FindNextRay(line.FindPos(closestT), ptracer.Objs.ObjList[closestObjIdx], closestTriangleIndex, closestBCoords)
+				colorAux = ptracer.TraceRayDepth(newLine, recursions-1)
+			}
+			for i := 0; i < 3; i++ {
+				color[i] = ptracer.Objs.ObjList[closestObjIdx].Color[i] * colorAux[i]
+			}
+		}
+	} else {
+		for i := 0; i < 3; i++ {
+			lgtAux := ptracer.Lgts.LightList[closestObjIdx]
+			color[i] = lgtAux.Color[i] * lgtAux.LightIntensity
+		}
 	}
-	return isShadow
+	return color
 }
 
 // TraceRay is a function to trace a ray through a pixel.
 //
 // Parameters:
-//  coloredScreen - the screen to be painted.
 // 	lp             - pixel line index.
 //  cp             - pixel column index.
+//  rays           - number of rays per pixel.
+//  recursions     - number of recursions.
 //
 // Returns:
 // 	the colored screen painted at that position.
 //
-func (ptracer *PathTracer) TraceRay(coloredScreen *screen.ColoredScreen, lp, cp int) {
-	screenV := ptracer.PixelScreen.PixelToWorld(lp, cp, 1.0, 0.5, 0.5)
-	line := entity.Line{Start: ptracer.Cam.Pos, Director: screenV}
-	color := make([]int, 3)
+func (ptracer *PathTracer) TraceRay(lp, cp, rays, recursions int) []int {
+	floatColors := make([][]float64, rays)
+	for ray := 0; ray < rays; ray++ {
 
-	closestT := math.MaxFloat64
-	closestObjIdx := -1
-	// intersecting objects
-	for objIdx, obj := range ptracer.Objs.ObjList { // iterating through all objects
-		for _, triangle := range obj.Triangles { // iterating through all triangles of an object
-			points := make([]entity.Point, 3)
-			for pi := 0; pi < 3; pi++ { // getting triangle points
-				points[pi] = obj.Vertices.Points[triangle.Vertices[pi]]
-			}
-			t, _, intersected := line.IntersectTriangle(points)
-			if intersected {
-				p := line.FindPos(t)
-				if p.Coordinates[2] >= (1+ptracer.Cam.Pos.Coordinates[2]) && t < closestT {
-					closestT = t
-					closestObjIdx = objIdx
+		screenV := ptracer.PixelScreen.PixelToWorld(lp, cp, 1.0, 0.5, 0.5, ptracer.Cam.FieldOfView)
+		line := entity.Line{Start: ptracer.Cam.Pos, Director: screenV}
+
+		color := make([]float64, 3)
+
+		closestT := math.MaxFloat64
+		closestObjIdx := -1
+		closestTriangleIndex := -1
+		closestBCoords := make([]float64, 3)
+		for objIdx, obj := range ptracer.Objs.ObjList { // iterating through all objects
+			for triangIdx, triangle := range obj.Triangles { // iterating through all triangles of an object
+				points := make([]entity.Point, 3)
+				for pi := 0; pi < 3; pi++ { // getting triangle points
+					points[pi] = obj.Vertices.Points[triangle.Vertices[pi]]
+				}
+				t, bCoords, intersected := line.IntersectTriangle(points)
+				if intersected {
+					pos := line.FindPos(t)
+					if t > 0 && pos.Coordinates[2] >= line.Start.Coordinates[2]+ptracer.Cam.Near && t < closestT {
+						closestT = t
+						closestObjIdx = objIdx
+						closestTriangleIndex = triangIdx
+						closestBCoords = bCoords
+					}
 				}
 			}
 		}
-	}
-	// intersecting lights
-	lightClosest := false
-	// for _, lgt := range ptracer.Lgts.LightList {
-	// 	sphere := entity.InitSphere(lgt.LightPosition, lgt.Radius)
-	// 	ts, intersected := line.IntersectSphere(sphere)
-	// 	if intersected && (ts[0] >= 1 || ts[1] >= 1) {
-	// 		if ts[0] <= closestT || ts[1] <= closestT {
-	// 			lightClosest = true
-	// 			if ts[0] <= ts[1] && ts[0] >= 1 {
-	// 				closestT = ts[0]
-	// 			} else {
-	// 				closestT = ts[1]
-	// 			}
-	// 		}
-	// 	}
-	// }
-	if !lightClosest {
-		if closestObjIdx != -1 {
-			color = ptracer.Objs.ObjList[closestObjIdx].Color
+
+		// intersecting lights
+		lightClosest := false
+		for lgtIdx, lgt := range ptracer.Lgts.LightList {
+			for _, triangle := range lgt.LightObject.Triangles { // iterating through all triangles of an object
+				points := make([]entity.Point, 3)
+				for pi := 0; pi < 3; pi++ { // getting triangle points
+					points[pi] = lgt.LightObject.Vertices.Points[triangle.Vertices[pi]]
+				}
+				t, _, intersected := line.IntersectTriangle(points)
+				if intersected {
+					pos := line.FindPos(t)
+					if t > 0 && pos.Coordinates[2] >= line.Start.Coordinates[2]+ptracer.Cam.Near && t <= closestT {
+						lightClosest = true
+						closestT = t
+						closestObjIdx = lgtIdx
+					}
+				}
+			}
 		}
-		coloredScreen.Colors[lp][cp] = color
-	} else {
-		coloredScreen.Colors[lp][cp] = []int{255, 255, 255}
+
+		if !lightClosest {
+			if closestObjIdx != -1 {
+				colorAux := []float64{1, 1, 1}
+				if recursions > 0 {
+					newLine := ptracer.FindNextRay(line.FindPos(closestT), ptracer.Objs.ObjList[closestObjIdx], closestTriangleIndex, closestBCoords)
+					colorAux = ptracer.TraceRayDepth(newLine, recursions-1)
+				}
+				for i := 0; i < 3; i++ {
+					color[i] = ptracer.Objs.ObjList[closestObjIdx].Color[i] * colorAux[i]
+				}
+			} else {
+				fmt.Println("no intersection", lp, cp)
+			}
+		} else {
+			for i := 0; i < 3; i++ {
+				lgtAux := ptracer.Lgts.LightList[closestObjIdx]
+				color[i] = lgtAux.Color[i] * lgtAux.LightIntensity
+			}
+		}
+		floatColors[ray] = color
 	}
+
+	// calculating average
+	color := make([]float64, 3)
+	for i := 0; i < rays; i++ {
+		for j := 0; j < 3; j++ {
+			color[j] = color[j] + (floatColors[i][j] / float64(rays))
+		}
+	}
+
+	intColor := make([]int, 3)
+	for i := 0; i < 3; i++ {
+		intColor[i] = int(math.Floor(math.Sqrt(color[i]) * 255))
+		if intColor[i] > 255 {
+			intColor[i] = 255
+		} else if intColor[i] < 0 {
+			intColor[i] = 0
+		}
+	}
+	return intColor
 
 }
 
@@ -186,11 +262,12 @@ func (ptracer *PathTracer) TraceRay(coloredScreen *screen.ColoredScreen, lp, cp 
 // Returns:
 // 	the colored screen.
 //
-func (ptracer *PathTracer) Run() *screen.ColoredScreen {
+func (ptracer *PathTracer) Run(rays, recursions int) *screen.ColoredScreen {
 	coloredScreen := screen.InitColoredScreen(ptracer.PixelScreen.Width, ptracer.PixelScreen.Height)
 	for i := 0; i < ptracer.PixelScreen.Height; i++ {
 		for j := 0; j < ptracer.PixelScreen.Width; j++ {
-			ptracer.TraceRay(&coloredScreen, i, j)
+			fmt.Println(i, j)
+			coloredScreen.Colors[i][j] = ptracer.TraceRay(i, j, rays, recursions)
 		}
 	}
 	return &coloredScreen
@@ -208,5 +285,6 @@ func (ptracer *PathTracer) Run() *screen.ColoredScreen {
 // 	a PathTracer.
 //
 func InitPathTracer(objs *general.Objects, pixelScreen *screen.Screen, cam *camera.Camera, lgts *light.Lights) PathTracer {
+	rand.Seed(time.Now().UnixNano())
 	return PathTracer{Objs: objs, PixelScreen: pixelScreen, Cam: cam, Lgts: lgts}
 }

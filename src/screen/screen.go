@@ -56,7 +56,7 @@ type Screen struct {
 // Parameters:
 // 	x        - position of the pixel.
 //  y        - position of the pixel.
-//  d        - distance viewport to cam (if negative, considered as 1).
+//  d        - distance viewport to cam.
 //  camWorld - the matrix camera to world.
 //  px       - the additional on x (0->1)
 //  py       - the additional on y (0->1)
@@ -73,10 +73,7 @@ func (sc *Screen) PixelToWorld(x, y int, d float64, px, py, fov float64) utils.V
 
 	aspectRatio := float64(sc.Width) / float64(sc.Height)
 	alpha := (fov / 2) * math.Pi / 180.0
-	z := 1.0
-	if d >= 0 {
-		z = d
-	}
+	z := d
 
 	camerax := (2*(float64(x)+px)/float64(sc.Width) - 1) * aspectRatio * math.Tan(alpha)
 	cameray := (1 - 2*(float64(y)+py)/float64(sc.Height)) * math.Tan(alpha)

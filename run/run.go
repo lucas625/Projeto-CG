@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	iterations := 5
-	raysPerPixel := 100
+	iterations := 10
+	raysPerPixel := 500
 
 	cam := camera.LoadJSONCamera("resources/run/json/camera.json")
 	lights := light.LoadJSONLights("resources/run/json/light.json")

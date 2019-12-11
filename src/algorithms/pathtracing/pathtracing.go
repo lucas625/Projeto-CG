@@ -5,6 +5,7 @@ import (
 	"math"
 	"math/rand"
 	"time"
+	"sync"
 
 	"github.com/lucas625/Projeto-CG/src/camera"
 	"github.com/lucas625/Projeto-CG/src/entity"
@@ -13,6 +14,29 @@ import (
 	"github.com/lucas625/Projeto-CG/src/screen"
 	"github.com/lucas625/Projeto-CG/src/utils"
 )
+
+type Locker struct {
+	threads int
+	sync.Mutex
+}
+
+func (lock *Locker) getThreads() int {
+	lock.Lock()
+	defer lock.Unlock()
+	return lock.threads
+}
+
+func (lock *Locker) addThreads() {
+	lock.Lock()
+	defer lock.Unlock()
+	lock.threads += 1
+}
+
+func (lock *Locker) removeThreads() {
+	lock.Lock()
+	defer lock.Unlock()
+	lock.threads -= 1
+}
 
 // PathTracer is a class for path tracing algorithm.
 //
@@ -37,22 +61,29 @@ type PathTracer struct {
 // Returns:
 // 	the vector.
 //
-func RandomInSemiSphere(normal utils.Vector) utils.Vector {
-	random1 := rand.Float64()
-	random2 := rand.Float64()
-	v1 := utils.Vector{Coordinates: []float64{random1 + normal.Coordinates[0], -1 * normal.Coordinates[1], -1 * normal.Coordinates[2]}}
-	v1 = utils.NormalizeVector(&v1)
-	if utils.DotProduct(&normal, &v1) < 0 { // cos
-		random1 = -1 * random1
-	}
-	v2 := utils.Vector{Coordinates: []float64{-1 * normal.Coordinates[0], random2 + normal.Coordinates[1], -1 * normal.Coordinates[2]}}
-	v2 = utils.NormalizeVector(&v2)
-	if utils.DotProduct(&normal, &v2) < 0 {
-		random2 = -1 * random2
-	}
-	resultingVector := utils.Vector{Coordinates: []float64{normal.Coordinates[0] + random1, normal.Coordinates[1] + random2, normal.Coordinates[2]}}
+func RandomInSemiSphere(normal utils.Vector, pos entity.Point) utils.Vector {
+	
+	found := false
 
-	return resultingVector
+	var random1,random2,random3 float64
+	var v utils.Vector
+	for !found {
+		found = true
+		random1 = rand.Float64()
+		random2 = rand.Float64()
+		random3 = rand.Float64()
+
+		v = utils.Vector{Coordinates: []float64{random1, random2, random3}}
+		v = utils.CMultVector(&v, 2)
+		vaux := utils.Vector{Coordinates: []float64{1,1,1}}
+		v = utils.SumVector(&v, &vaux, 1, -1)
+		if math.Pow(utils.VectorNorm(&v),2) >= 1{
+			found = false
+		}
+	}
+	vect := utils.SumVector(&normal, &v, 1, 1)
+	vect = utils.NormalizeVector(&vect)
+	return vect
 }
 
 // FindNextRay is a function to find the next line.
@@ -80,7 +111,7 @@ func (ptracer *PathTracer) FindNextRay(pos entity.Point, obj general.Object, tri
 	vector := utils.Vector{Coordinates: []float64{1.0, 1.0, 1.0}}
 	if r <= obj.DiffuseReflection {
 		// FIXME: calculate correct diffuse reflection
-		vector = RandomInSemiSphere(resultingNormal)
+		vector = RandomInSemiSphere(resultingNormal, pos)
 	} else if r <= obj.DiffuseReflection+obj.SpecularReflection {
 		lightPos := ptracer.Lgts.LightList[0].LightObject.GetCenter()
 		Lvector := entity.ExtractVector(&pos, &lightPos)
@@ -182,88 +213,106 @@ func (ptracer *PathTracer) TraceRayDepth(line entity.Line, recursions int) []flo
 //
 func (ptracer *PathTracer) TraceRay(lp, cp, rays, recursions int) []int {
 	floatColors := make([][]float64, rays)
+	lock := Locker{threads:0}
 	for ray := 0; ray < rays; ray++ {
+		if lock.getThreads() < 12 {
+			lock.addThreads()
+			go func(inRay int) {
+				offx := rand.Float64()
+				offy := rand.Float64()
 
-		offx := rand.Float64()
-		offy := rand.Float64()
+				screenV := ptracer.PixelScreen.PixelToWorld(lp, cp, 1.0, offx, offy, ptracer.Cam.FieldOfView)
+				line := entity.Line{Start: ptracer.Cam.Pos, Director: screenV}
 
-		screenV := ptracer.PixelScreen.PixelToWorld(lp, cp, 1.0, offx, offy, ptracer.Cam.FieldOfView)
-		line := entity.Line{Start: ptracer.Cam.Pos, Director: screenV}
+				color := make([]float64, 3)
 
-		color := make([]float64, 3)
-
-		closestT := math.MaxFloat64
-		closestObjIdx := -1
-		closestTriangleIndex := -1
-		closestBCoords := make([]float64, 3)
-		for objIdx, obj := range ptracer.Objs.ObjList { // iterating through all objects
-			for triangIdx, triangle := range obj.Triangles { // iterating through all triangles of an object
-				points := make([]entity.Point, 3)
-				for pi := 0; pi < 3; pi++ { // getting triangle points
-					points[pi] = obj.Vertices.Points[triangle.Vertices[pi]]
-				}
-				t, bCoords, intersected := line.IntersectTriangle(points)
-				if intersected {
-					if t >= 1 && t < closestT {
-						closestT = t
-						closestObjIdx = objIdx
-						closestTriangleIndex = triangIdx
-						closestBCoords = bCoords
+				closestT := math.MaxFloat64
+				closestObjIdx := -1
+				closestTriangleIndex := -1
+				closestBCoords := make([]float64, 3)
+				
+				for objIdx, obj := range ptracer.Objs.ObjList { // iterating through all objects
+					for triangIdx, triangle := range obj.Triangles { // iterating through all triangles of an object
+						points := make([]entity.Point, 3)
+						for pi := 0; pi < 3; pi++ { // getting triangle points
+							points[pi] = obj.Vertices.Points[triangle.Vertices[pi]]
+						}
+						t, bCoords, intersected := line.IntersectTriangle(points)
+						if intersected {
+							if t >= 1 && t < closestT {
+								closestT = t
+								closestObjIdx = objIdx
+								closestTriangleIndex = triangIdx
+								closestBCoords = bCoords
+							}
+						}
 					}
 				}
-			}
-		}
 
-		// intersecting lights
-		lightClosest := false
-		for lgtIdx, lgt := range ptracer.Lgts.LightList {
-			for _, triangle := range lgt.LightObject.Triangles { // iterating through all triangles of an object
-				points := make([]entity.Point, 3)
-				for pi := 0; pi < 3; pi++ { // getting triangle points
-					points[pi] = lgt.LightObject.Vertices.Points[triangle.Vertices[pi]]
-				}
-				t, _, intersected := line.IntersectTriangle(points)
-				if intersected {
-					if t >= 1 && t <= closestT {
-						lightClosest = true
-						closestT = t
-						closestObjIdx = lgtIdx
+				// intersecting lights
+				lightClosest := false
+				for lgtIdx, lgt := range ptracer.Lgts.LightList {
+					for _, triangle := range lgt.LightObject.Triangles { // iterating through all triangles of an object
+						points := make([]entity.Point, 3)
+						for pi := 0; pi < 3; pi++ { // getting triangle points
+							points[pi] = lgt.LightObject.Vertices.Points[triangle.Vertices[pi]]
+						}
+						t, _, intersected := line.IntersectTriangle(points)
+						if intersected {
+							if t >= 1 && t <= closestT {
+								lightClosest = true
+								closestT = t
+								closestObjIdx = lgtIdx
+							}
+						}
 					}
 				}
-			}
-		}
 
-		if !lightClosest {
-			if closestObjIdx != -1 {
-				colorAux := []float64{1, 1, 1}
-				if recursions > 0 {
-					newLine := ptracer.FindNextRay(line.FindPos(closestT), ptracer.Objs.ObjList[closestObjIdx], closestTriangleIndex, closestBCoords)
-					colorAux = ptracer.TraceRayDepth(newLine, recursions-1)
+				if !lightClosest {
+					if closestObjIdx != -1 {
+						colorAux := []float64{0, 0, 0}
+						if recursions > 0 {
+							newLine := ptracer.FindNextRay(line.FindPos(closestT), ptracer.Objs.ObjList[closestObjIdx], closestTriangleIndex, closestBCoords)
+							colorAux = ptracer.TraceRayDepth(newLine, recursions-1)
+						}
+						for i := 0; i < 3; i++ {
+							color[i] = ptracer.Objs.ObjList[closestObjIdx].Color[i] * colorAux[i]
+						}
+					}
+				} else {
+					for i := 0; i < 3; i++ {
+						lgtAux := ptracer.Lgts.LightList[closestObjIdx]
+						color[i] = lgtAux.Color[i] * lgtAux.LightIntensity
+					}
 				}
-				for i := 0; i < 3; i++ {
-					color[i] = ptracer.Objs.ObjList[closestObjIdx].Color[i] * colorAux[i]
-				}
-			}
+				floatColors[inRay] = color
+				lock.removeThreads()
+			}(ray)
 		} else {
-			for i := 0; i < 3; i++ {
-				lgtAux := ptracer.Lgts.LightList[closestObjIdx]
-				color[i] = lgtAux.Color[i] * lgtAux.LightIntensity
-			}
+			time.Sleep(20)
+			ray--
 		}
-		floatColors[ray] = color
+	}
+	ended := false
+	for !ended {
+		if lock.getThreads() == 0 {
+			ended = true
+		} else {
+			time.Sleep(25)
+		}
 	}
 
 	// calculating average
 	color := make([]float64, 3)
 	for i := 0; i < rays; i++ {
 		for j := 0; j < 3; j++ {
-			color[j] = color[j] + (floatColors[i][j] / float64(rays))
+			color[j] = color[j] + floatColors[i][j]
 		}
 	}
 
 	intColor := make([]int, 3)
 	for i := 0; i < 3; i++ {
-		intColor[i] = int(math.Floor(math.Sqrt(color[i]) * 255))
+		intColor[i] = int(math.Floor(math.Sqrt(color[i]/float64(rays)) * 255))
 		if intColor[i] > 255 {
 			intColor[i] = 255
 		} else if intColor[i] < 0 {
@@ -286,9 +335,10 @@ func (ptracer *PathTracer) Run(rays, recursions int) *screen.ColoredScreen {
 	coloredScreen := screen.InitColoredScreen(ptracer.PixelScreen.Width, ptracer.PixelScreen.Height)
 	for i := 0; i < ptracer.PixelScreen.Height; i++ {
 		for j := 0; j < ptracer.PixelScreen.Width; j++ {
-			fmt.Println(i, j)
-			coloredScreen.Colors[i][j] = ptracer.TraceRay(i, j, rays, recursions)
+			
+			coloredScreen.Colors[i][j] = ptracer.TraceRay(j, i, rays, recursions)
 		}
+		fmt.Println(float64(i)/float64(ptracer.PixelScreen.Height),"%")
 	}
 	return &coloredScreen
 }

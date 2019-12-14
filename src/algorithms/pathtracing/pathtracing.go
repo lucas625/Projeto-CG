@@ -459,7 +459,7 @@ func (ptracer *PathTracer) Run(rays, recursions int) *screen.ColoredScreen {
 			
 			coloredScreen.Colors[i][j] = ptracer.TraceRay(j, i, rays, recursions)
 		}
-		fmt.Println(float64(i)/float64(ptracer.PixelScreen.Height),"%")
+		fmt.Println(float64(i)*100.0/float64(ptracer.PixelScreen.Height),"%")
 	}
 	return &coloredScreen
 }

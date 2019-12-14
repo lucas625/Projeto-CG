@@ -11,12 +11,13 @@ import (
 )
 
 func main() {
-	iterations := 6
-	raysPerPixel := 100
+	iterations := 5
+	raysPerPixel := 10
 
 	cam := camera.LoadJSONCamera("resources/run/json/camera.json")
 	lights := light.LoadJSONLights("resources/run/json/light.json")
 	objects := general.LoadJSONObjects("resources/run/json/objects.json")
+	objects.WriteJSONObjects("out/ppp")
 	outPath := "out/pathtracing"
 
 	// getting screen

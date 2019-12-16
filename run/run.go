@@ -12,7 +12,7 @@ import (
 
 func main() {
 	iterations := 5
-	raysPerPixel := 1000
+	raysPerPixel := 100
 
 	cam := camera.LoadJSONCamera("resources/run/json/camera.json")
 	lights := light.LoadJSONLights("resources/run/json/light.json")
@@ -21,11 +21,11 @@ func main() {
 
 	// getting screen
 	camMatrix := camera.CamToWorld(cam)
-	sc := screen.InitScreen(600, 600)
+	sc := screen.InitScreen(200, 200)
 	sc.CamToWorld = &camMatrix
 
 	pathTracer := pathtracing.InitPathTracer(objects, &sc, cam, lights)
 
 	colorScreen := pathTracer.Run(raysPerPixel, iterations)
-	visualizer.WritePPM(*colorScreen, outPath, "bestwithsphere", false)
+	visualizer.WritePPM(*colorScreen, outPath, "tryluca", false)
 }
